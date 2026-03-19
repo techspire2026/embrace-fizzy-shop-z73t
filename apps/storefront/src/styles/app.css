@@ -1,15 +1,15 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 @import "./theme.css";
 
 @layer base {
   :root {
-    @apply bg-neutral-50 text-neutral-900 antialiased;
+    @apply bg-cream-50 text-bark-900 antialiased;
     text-rendering: optimizeLegibility;
     letter-spacing: -0.01em;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
@@ -17,14 +17,12 @@
 }
 
 @layer components {
-  /* Content container */
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-12 md:px-24 lg:px-32 xl:px-40;
+    @apply max-w-[1440px] w-full mx-auto px-6 md:px-12 lg:px-20 xl:px-28;
   }
 }
 
 @layer utilities {
-  /* Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -34,8 +32,8 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   input:not([type="checkbox"]):focus ~ label,
@@ -47,20 +45,19 @@
     @apply left-0;
   }
 
-  /* input:not([type="checkbox"]):-webkit-autofill,
-  input:not([type="checkbox"]):-webkit-autofill:hover,
-  input:not([type="checkbox"]):-webkit-autofill:focus,
-  textarea:-webkit-autofill,
-  textarea:-webkit-autofill:hover,
-  textarea:-webkit-autofill:focus,
-  select:-webkit-autofill,
-  select:-webkit-autofill:hover,
-  select:-webkit-autofill:focus {
-    border: 1px solid #212121;
-    -webkit-text-fill-color: #212121;
-    -webkit-box-shadow: 0 0 0px 1000px #fff inset;
-    transition: background-color 5000s ease-in-out 0s;
-  } */
+  .marquee-track {
+    display: flex;
+    white-space: nowrap;
+    animation: marquee 24s linear infinite;
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  .marquee-item {
+    white-space: nowrap;
+  }
 }
 
 /* Navigation menu dropdown animations */
