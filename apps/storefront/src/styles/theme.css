@@ -1,33 +1,58 @@
 @theme {
   /* Font Family */
   --font-sans:
-    Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Ubuntu, sans-serif;
+    "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  
-  /* Brand Colors - Scandinavian Athleisure Palette */
-  --color-sand-50: #faf9f7;
-  --color-sand-100: #f5f3ef;
-  --color-sand-200: #ebe8e0;
-  --color-sand-300: #ddd9cd;
-  --color-sand-400: #cac3b3;
-  --color-sand-500: #b5ab95;
-  --color-sand-600: #9d9278;
-  --color-sand-700: #807761;
-  --color-sand-800: #645f4f;
-  --color-sand-900: #4a463c;
-  
-  --color-olive-50: #f7f8f5;
-  --color-olive-100: #ecefe5;
-  --color-olive-200: #d7dcc9;
-  --color-olive-300: #b9c4a3;
-  --color-olive-400: #98a67c;
-  --color-olive-500: #7d8c5f;
-  --color-olive-600: #626f4a;
-  --color-olive-700: #4e5a3c;
-  --color-olive-800: #3f4831;
-  --color-olive-900: #2e3424;
+    "Cormorant Garamond", Georgia, "Times New Roman", serif;
+
+  /* Brand Colors - Earthy Indian D2C Palette */
+  /* Terracotta - warm, grounding */
+  --color-terracotta-50: #fdf4f0;
+  --color-terracotta-100: #fbe5db;
+  --color-terracotta-200: #f6c9b5;
+  --color-terracotta-300: #efa486;
+  --color-terracotta-400: #e67a55;
+  --color-terracotta-500: #d95e38;
+  --color-terracotta-600: #c24428;
+  --color-terracotta-700: #a1361f;
+  --color-terracotta-800: #852e1d;
+  --color-terracotta-900: #6f2a1c;
+
+  /* Sage - calm, natural, gut-health green */
+  --color-sage-50: #f3f6f0;
+  --color-sage-100: #e4ecdd;
+  --color-sage-200: #c8d9bb;
+  --color-sage-300: #a4bf92;
+  --color-sage-400: #7fa26c;
+  --color-sage-500: #5f8650;
+  --color-sage-600: #4a6b3d;
+  --color-sage-700: #3c5631;
+  --color-sage-800: #314529;
+  --color-sage-900: #263820;
+
+  /* Cream - warm base */
+  --color-cream-50: #fefcf8;
+  --color-cream-100: #fdf7ed;
+  --color-cream-200: #f9edd4;
+  --color-cream-300: #f3ddb0;
+  --color-cream-400: #eac87e;
+  --color-cream-500: #deb050;
+  --color-cream-600: #c59335;
+  --color-cream-700: #a37528;
+  --color-cream-800: #845f24;
+  --color-cream-900: #6c4e21;
+
+  /* Bark - deep warm brown for text */
+  --color-bark-50: #f7f4f1;
+  --color-bark-100: #ede6de;
+  --color-bark-200: #dbccbc;
+  --color-bark-300: #c3aa91;
+  --color-bark-400: #ab8969;
+  --color-bark-500: #947050;
+  --color-bark-600: #7a5b40;
+  --color-bark-700: #654b35;
+  --color-bark-800: #523d2d;
+  --color-bark-900: #433226;
 
   /* Animation */
   --animation-ring: ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
@@ -44,103 +69,63 @@
   --animation-enter: enter 200ms ease-out;
   --animation-slide-in: slide-in 1.2s cubic-bezier(0.41, 0.73, 0.51, 1.02);
   --animation-leave: leave 150ms ease-in forwards;
+  --animation-float: float 6s ease-in-out infinite;
+  --animation-marquee: marquee 24s linear infinite;
 
   /* Keyframes definitions */
   @keyframes ring {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   @keyframes fade-in-right {
-    0% {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    0% { opacity: 0; transform: translateX(10px); }
+    100% { opacity: 1; transform: translateX(0); }
   }
 
   @keyframes fade-in-top {
-    0% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes fade-out-top {
-    0% {
-      height: 100%;
-    }
-    99% {
-      height: 0;
-    }
-    100% {
-      visibility: hidden;
-    }
+    0% { height: 100%; }
+    99% { height: 0; }
+    100% { visibility: hidden; }
   }
 
   @keyframes accordion-slide-up {
-    0% {
-      height: var(--radix-accordion-content-height);
-      opacity: 1;
-    }
-    100% {
-      height: 0;
-      opacity: 0;
-    }
+    0% { height: var(--radix-accordion-content-height); opacity: 1; }
+    100% { height: 0; opacity: 0; }
   }
 
   @keyframes accordion-slide-down {
-    0% {
-      min-height: 0;
-      max-height: 0;
-      opacity: 0;
-    }
-    100% {
-      min-height: var(--radix-accordion-content-height);
-      max-height: none;
-      opacity: 1;
-    }
+    0% { min-height: 0; max-height: 0; opacity: 0; }
+    100% { min-height: var(--radix-accordion-content-height); max-height: none; opacity: 1; }
   }
 
   @keyframes enter {
-    0% {
-      transform: scale(0.9);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
 
   @keyframes leave {
-    0% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(0.9);
-      opacity: 0;
-    }
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0; }
   }
 
   @keyframes slide-in {
-    0% {
-      transform: translateY(-100%);
-    }
-    100% {
-      transform: translateY(0);
-    }
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 }
