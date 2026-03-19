@@ -1,6 +1,7 @@
 import ErrorBoundary from "@/components/error-boundary"
 import Footer from "@/components/footer"
 import { Navbar } from "@/components/navbar"
+import { WhatsAppWidget } from "@/components/whatsapp-widget"
 import { CartProvider } from "@/lib/context/cart"
 import { ToastProvider } from "@/lib/context/toast-context"
 import { Outlet } from "@tanstack/react-router"
@@ -19,6 +20,7 @@ const Layout = () => {
           </main>
 
           <Footer />
+          <WhatsAppWidget />
         </div>
       </CartProvider>
     </ToastProvider>

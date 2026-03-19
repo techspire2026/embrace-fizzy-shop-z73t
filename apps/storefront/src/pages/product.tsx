@@ -1,6 +1,5 @@
 import ProductActions from "@/components/product-actions"
 import { ImageGalleryEnhanced } from "@/components/ui/image-gallery-enhanced"
-import { ProductAccordions } from "@/components/product/product-accordions"
 import { RelatedProducts } from "@/components/product/related-products"
 import { useLoaderData, useLocation } from "@tanstack/react-router"
 import { useProducts } from "@/lib/hooks/use-products"
@@ -9,38 +8,40 @@ import { useState, useMemo, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { Share } from "@medusajs/icons"
 
-/**
- * Enhanced Product Page
- *
- * Features:
- * - High-res image gallery with zoom
- * - Image rollover on thumbnails
- * - Variant selection (size, color swatches)
- * - Product information accordions
- * - Related products carousel
- * - Add to cart with Quick Buy option
- */
+const NUTRITION = [
+  { label: "Serving Size", value: "330ml" },
+  { label: "Dietary Fiber", value: "6.25g", highlight: true },
+  { label: "Sugar", value: "< 2g" },
+  { label: "Calories", value: "~25 kcal" },
+  { label: "Prebiotics", value: "Present" },
+  { label: "Artificial Additives", value: "None" },
+]
+
+const INGREDIENTS_LIST = [
+  "Carbonated Water",
+  "Chicory Root Extract (Inulin)",
+  "Natural Fruit Juice Concentrate",
+  "Monk Fruit Extract",
+  "Citric Acid (Natural)",
+  "Natural Flavors",
+]
+
 const ProductDetails = () => {
   const { product, region } = useLoaderData({
     from: "/$countryCode/products/$handle",
   })
-  
   const location = useLocation()
-  const countryCode = getCountryCodeFromPath(location.pathname) || "us"
+  const countryCode = getCountryCodeFromPath(location.pathname) || "in"
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
   const [copied, setCopied] = useState(false)
+  const [nutritionOpen, setNutritionOpen] = useState(false)
 
-  const handleVariantChange = useCallback((_variant: HttpTypes.StoreProductVariant | undefined) => {
-    // Variant tracking available for future use
-  }, [])
+  const handleVariantChange = useCallback((_variant: HttpTypes.StoreProductVariant | undefined) => {}, [])
 
   const handleOptionsChange = useCallback((options: Record<string, string | undefined>) => {
-    // Filter out undefined values
     const definedOptions = Object.entries(options).reduce((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value
-      }
+      if (value !== undefined) acc[key] = value
       return acc
     }, {} as Record<string, string>)
     setSelectedOptions(definedOptions)
@@ -48,27 +49,22 @@ const ProductDetails = () => {
 
   const handleShare = useCallback(() => {
     const url = window.location.href
-    navigator.clipboard.writeText(url)
-      .then(() => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      })
-      .catch(() => {
-        // Fallback: create a temporary input to copy
-        const input = document.createElement("input")
-        input.value = url
-        input.style.position = "fixed"
-        input.style.opacity = "0"
-        document.body.appendChild(input)
-        input.select()
-        document.execCommand("copy")
-        document.body.removeChild(input)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      })
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {
+      const input = document.createElement("input")
+      input.value = url
+      Object.assign(input.style, { position: "fixed", opacity: "0" })
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand("copy")
+      document.body.removeChild(input)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
   }, [])
 
-  // Fetch related products (showing first 4 products as related)
   const { data: relatedProductsData } = useProducts({
     query_params: {
       limit: 5,
@@ -77,115 +73,171 @@ const ProductDetails = () => {
     region_id: region.id,
   })
 
-  // Filter out current product from related products
   const relatedProducts =
     relatedProductsData?.pages
       .flatMap((page) => page.products)
       .filter((p) => p.id !== product.id)
       .slice(0, 4) || []
 
-  // Reorder images based on selected color option
-  // Images linked to variants with the selected color appear first
   const displayImages = useMemo(() => {
-    const allImages = product.images || []
-    
-    // Find the color option
-    const colorOption = product.options?.find(
-      (opt: HttpTypes.StoreProductOption) => opt.title.toLowerCase() === "color"
-    )
-    
-    if (!colorOption) {
-      return allImages
-    }
-
-    const selectedColorValue = selectedOptions[colorOption.id]
-    
-    if (!selectedColorValue) {
-      return allImages
-    }
-
-    // Find variants that match the selected color
-    const matchingVariants = product.variants?.filter((variant: HttpTypes.StoreProductVariant) => {
-      return variant.options?.some(
-        (opt: HttpTypes.StoreProductOptionValue) => opt.option_id === colorOption.id && opt.value === selectedColorValue
-      )
-    }) || []
-
-    // Get all image IDs from matching variants
-    const variantImageIds = new Set(
-      matchingVariants.flatMap((v: HttpTypes.StoreProductVariant) => v.images?.map((img: HttpTypes.StoreProductImage) => img.id) || [])
-    )
-
-    const variantImages = allImages.filter((img: HttpTypes.StoreProductImage) => variantImageIds.has(img.id))
-    const otherImages = allImages.filter((img: HttpTypes.StoreProductImage) => !variantImageIds.has(img.id))
-
-    return [...variantImages, ...otherImages]
-  }, [product.images, product.options, product.variants, selectedOptions])
+    return product.images || []
+  }, [product.images])
 
   return (
     <>
-      <div className="content-container pt-32 pb-12">
+      <div className="content-container pt-[100px] pb-12 bg-cream-50">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Left: Image gallery with zoom */}
+          {/* Left: Image Gallery */}
           <div>
             <ImageGalleryEnhanced images={displayImages} />
           </div>
 
-          {/* Right: Product info + variant selection */}
+          {/* Right: Product Info */}
           <div className="flex flex-col">
-            <div className="sticky top-32 self-start w-full">
-              {/* Product name - bigger at the top */}
-              <h1 className="text-4xl md:text-5xl font-display font-semibold text-neutral-900 mb-6 tracking-tight">
+            <div className="sticky top-28 self-start w-full">
+              {/* Brand pill */}
+              <span className="inline-block mb-3 px-3 py-1 bg-terracotta-100 text-terracotta-700 text-xs font-semibold tracking-widest uppercase rounded-full">
+                Prebiotic Fizzy Drink
+              </span>
+
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-bark-900 mb-2 tracking-tight">
                 {product.title}
               </h1>
 
-            {/* Variant selection & Add to Cart - contains price */}
-            <div className="mb-8">
-              <ProductActions 
-                product={product} 
-                region={region}
-                onVariantChange={handleVariantChange}
-                onOptionsChange={handleOptionsChange}
-              />
-            </div>
-
-              {/* Description below the actions */}
-              {product.description && (
-                <div className="mb-8 pb-8 border-b border-neutral-200">
-                  <p className="text-neutral-700 leading-relaxed text-base">
-                    {product.description}
-                  </p>
+              {/* Fiber highlight */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-2 bg-sage-100 text-sage-700 px-4 py-2 rounded-full text-sm font-semibold">
+                  <span>6.25g Dietary Fiber</span>
                 </div>
+                <div className="flex items-center gap-2 bg-cream-200 text-bark-700 px-4 py-2 rounded-full text-sm font-semibold">
+                  <span>100% Natural</span>
+                </div>
+              </div>
+
+              {/* Product description */}
+              {product.description && (
+                <p className="text-bark-600 leading-relaxed text-base mb-8">
+                  {product.description}
+                </p>
               )}
 
-              {/* Product Information Accordions */}
-              <ProductAccordions />
+              {/* Variant selection + Add to Cart */}
+              <div className="mb-8">
+                <ProductActions
+                  product={product}
+                  region={region}
+                  onVariantChange={handleVariantChange}
+                  onOptionsChange={handleOptionsChange}
+                />
+              </div>
 
-              {/* Share Product */}
+              {/* Trust signals */}
+              <div className="grid grid-cols-3 gap-3 mb-8 text-center">
+                {[
+                  { icon: "🚚", text: "Free delivery above ₹499" },
+                  { icon: "🌿", text: "All natural ingredients" },
+                  { icon: "↩️", text: "Easy 7-day returns" },
+                ].map((t) => (
+                  <div key={t.text} className="bg-cream-100 rounded-xl p-3 border border-cream-200">
+                    <div className="text-lg mb-1">{t.icon}</div>
+                    <div className="text-xs text-bark-600 leading-tight">{t.text}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Nutrition Facts Accordion */}
+              <div className="border border-cream-200 rounded-2xl overflow-hidden mb-4">
+                <button
+                  onClick={() => setNutritionOpen(!nutritionOpen)}
+                  className="w-full flex items-center justify-between px-5 py-4 bg-cream-50 hover:bg-cream-100 transition-colors text-left"
+                >
+                  <span className="font-semibold text-bark-900 text-sm">Nutrition Facts</span>
+                  <svg
+                    className={`w-4 h-4 text-bark-600 transition-transform duration-200 ${nutritionOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {nutritionOpen && (
+                  <div className="px-5 py-4 bg-white border-t border-cream-200">
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      {NUTRITION.map((n) => (
+                        <div
+                          key={n.label}
+                          className={`rounded-xl p-3 text-center ${n.highlight ? "bg-terracotta-50 border border-terracotta-200" : "bg-cream-50"}`}
+                        >
+                          <div className={`font-display text-xl font-bold ${n.highlight ? "text-terracotta-600" : "text-bark-900"}`}>
+                            {n.value}
+                          </div>
+                          <div className="text-xs text-bark-500 mt-0.5">{n.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-bark-700 uppercase tracking-wide mb-2">Ingredients</div>
+                      <p className="text-sm text-bark-500 leading-relaxed">
+                        {INGREDIENTS_LIST.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* WhatsApp Support CTA */}
+              <a
+                href="https://wa.me/918000000000?text=Hi%20Embrace%2C%20I%20have%20a%20question%20about%20my%20order."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 border border-green-200 bg-green-50 hover:bg-green-100 text-green-800 rounded-xl px-5 py-4 transition-colors mb-4 group"
+              >
+                <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <div>
+                  <div className="text-sm font-semibold">Chat with us on WhatsApp</div>
+                  <div className="text-xs text-green-600 mt-0.5">Usually replies within minutes</div>
+                </div>
+              </a>
+
+              {/* Share */}
               <button
                 onClick={handleShare}
-                className="mt-6 flex items-center gap-2 text-sm font-medium text-neutral-900 hover:text-neutral-600 transition-colors"
+                className="flex items-center gap-2 text-sm font-medium text-bark-600 hover:text-terracotta-600 transition-colors"
               >
                 <Share className="w-4 h-4" />
-                {copied ? "Link copied!" : "Share Product"}
+                {copied ? "Link copied!" : "Share this drink"}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Free Shipping & Returns Info Box */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <div className="bg-neutral-50 p-8 rounded-lg">
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Free Shipping</h3>
-            <p className="text-sm text-neutral-700 leading-relaxed">
-              Enjoy free standard shipping on all orders. Your items will be carefully packaged and delivered to your doorstep at no extra cost.
-            </p>
-          </div>
-          <div className="bg-neutral-50 p-8 rounded-lg">
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Hassle-Free Returns</h3>
-            <p className="text-sm text-neutral-700 leading-relaxed">
-              Not completely satisfied? Return your unworn items within 30 days for a full refund. Free return shipping included.
-            </p>
+        {/* Brand promise */}
+        <div className="mt-20 bg-sage-50 rounded-3xl p-10 border border-sage-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="text-3xl mb-3">🌱</div>
+              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Prebiotic Power</h3>
+              <p className="text-bark-500 text-sm leading-relaxed">
+                Chicory root inulin feeds the good bacteria in your gut, improving digestion and immunity over time.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">🍹</div>
+              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Crafted for India</h3>
+              <p className="text-bark-500 text-sm leading-relaxed">
+                Flavors developed specifically for the Indian palate — bold, familiar, and refreshing all at once.
+              </p>
+            </div>
+            <div>
+              <div className="text-3xl mb-3">💚</div>
+              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Your Daily Ritual</h3>
+              <p className="text-bark-500 text-sm leading-relaxed">
+                Replace your sugary fizzy drinks with Embrace — guilt-free, gut-friendly, and genuinely delicious.
+              </p>
+            </div>
           </div>
         </div>
       </div>
