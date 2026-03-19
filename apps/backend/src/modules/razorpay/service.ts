@@ -1,18 +1,26 @@
 import { AbstractPaymentProvider } from "@medusajs/framework/utils"
 import {
-  PaymentProviderError,
-  PaymentProviderSessionResponse,
   AuthorizePaymentInput,
+  AuthorizePaymentOutput,
   CancelPaymentInput,
+  CancelPaymentOutput,
   CapturePaymentInput,
+  CapturePaymentOutput,
   DeletePaymentInput,
+  DeletePaymentOutput,
   GetPaymentStatusInput,
+  GetPaymentStatusOutput,
   InitiatePaymentInput,
+  InitiatePaymentOutput,
   RefundPaymentInput,
+  RefundPaymentOutput,
   RetrievePaymentInput,
+  RetrievePaymentOutput,
   UpdatePaymentInput,
+  UpdatePaymentOutput,
   WebhookActionResult,
-} from "@medusajs/types"
+  PaymentSessionStatus,
+} from "@medusajs/framework/types"
 
 type Options = {
   key_id: string
@@ -84,284 +92,226 @@ class RazorpayProviderService extends AbstractPaymentProvider<Options> {
 
   async initiatePayment(
     input: InitiatePaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  ): Promise<InitiatePaymentOutput> {
     const { amount, currency_code, context } = input
 
-    try {
-      // Razorpay uses smallest currency unit (paise for INR)
-      const order = await this.razorpayRequest<RazorpayOrder>("POST", "/orders", {
-        amount: Math.round(amount * 100),
-        currency: currency_code.toUpperCase(),
-        receipt: `order_${Date.now()}`,
-        notes: {
-          cart_id: (context as Record<string, string>)?.cart_id || "",
-        },
-      })
+    // Razorpay uses smallest currency unit (paise for INR)
+    const amountInPaise = Math.round(Number(amount) * 100)
+    const order = await this.razorpayRequest<RazorpayOrder>("POST", "/orders", {
+      amount: amountInPaise,
+      currency: currency_code.toUpperCase(),
+      receipt: `order_${Date.now()}`,
+      notes: {
+        cart_id: (context as Record<string, string>)?.cart_id || "",
+      },
+    })
 
-      return {
-        session_data: {
-          razorpay_order_id: order.id,
-          key_id: this.options_.key_id,
-          amount: order.amount,
-          currency: order.currency,
-          status: order.status,
-        },
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_initiate_error",
-        detail: error,
-      }
+    return {
+      id: order.id,
+      data: {
+        id: order.id,
+        key_id: this.options_.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        status: order.status,
+      },
     }
   }
 
   async authorizePayment(
     input: AuthorizePaymentInput
-  ): Promise<PaymentProviderError | { data: Record<string, unknown>; status: string }> {
+  ): Promise<AuthorizePaymentOutput> {
     const { data } = input
+    const razorpayPaymentId = (data as Record<string, string>)?.razorpay_payment_id
+    const razorpayOrderId = (data as Record<string, string>)?.razorpay_order_id
+    const razorpaySignature = (data as Record<string, string>)?.razorpay_signature
 
-    try {
-      const razorpayPaymentId = (data as Record<string, string>)?.razorpay_payment_id
-      const razorpayOrderId = (data as Record<string, string>)?.razorpay_order_id
-      const razorpaySignature = (data as Record<string, string>)?.razorpay_signature
+    // Verify signature if all three are present
+    if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
+      const crypto = await import("crypto")
+      const expectedSignature = crypto
+        .createHmac("sha256", this.options_.key_secret)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest("hex")
 
-      // Verify signature
-      if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
-        const crypto = await import("crypto")
-        const expectedSignature = crypto
-          .createHmac("sha256", this.options_.key_secret)
-          .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-          .digest("hex")
-
-        if (expectedSignature !== razorpaySignature) {
-          return {
-            error: "Payment signature verification failed",
-            code: "razorpay_signature_mismatch",
-            detail: "The payment signature does not match",
-          }
-        }
-
+      if (expectedSignature !== razorpaySignature) {
         return {
-          status: "authorized",
-          data: {
-            ...(data as Record<string, unknown>),
-            razorpay_payment_id: razorpayPaymentId,
-            razorpay_order_id: razorpayOrderId,
-            razorpay_signature: razorpaySignature,
-          },
+          status: "error" as PaymentSessionStatus,
+          data: data as Record<string, unknown>,
         }
       }
 
-      // Check existing order status
-      const orderId = (data as Record<string, string>)?.razorpay_order_id
-      if (orderId) {
+      return {
+        status: "authorized" as PaymentSessionStatus,
+        data: {
+          ...(data as Record<string, unknown>),
+          razorpay_payment_id: razorpayPaymentId,
+          razorpay_order_id: razorpayOrderId,
+          razorpay_signature: razorpaySignature,
+        },
+      }
+    }
+
+    // Check existing order status
+    const orderId = (data as Record<string, string>)?.id || (data as Record<string, string>)?.razorpay_order_id
+    if (orderId) {
+      try {
         const order = await this.razorpayRequest<RazorpayOrder>(
           "GET",
           `/orders/${orderId}`
         )
         if (order.status === "paid") {
           return {
-            status: "authorized",
+            status: "authorized" as PaymentSessionStatus,
             data: data as Record<string, unknown>,
           }
         }
+      } catch {
+        // ignore errors when checking order status
       }
+    }
 
-      return {
-        status: "pending",
-        data: data as Record<string, unknown>,
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_authorize_error",
-        detail: error,
-      }
+    return {
+      status: "pending" as PaymentSessionStatus,
+      data: data as Record<string, unknown>,
     }
   }
 
   async capturePayment(
     input: CapturePaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  ): Promise<CapturePaymentOutput> {
     const { data } = input
+    const paymentId = (data as Record<string, string>)?.razorpay_payment_id
 
-    try {
-      const paymentId = (data as Record<string, string>)?.razorpay_payment_id
+    if (!paymentId) {
+      return { data: data as Record<string, unknown> }
+    }
 
-      if (!paymentId) {
-        return {
-          session_data: data as Record<string, unknown>,
-        }
-      }
+    const payment = await this.razorpayRequest<RazorpayPayment>(
+      "GET",
+      `/payments/${paymentId}`
+    )
 
-      // Fetch the payment to check if already captured
-      const payment = await this.razorpayRequest<RazorpayPayment>(
-        "GET",
-        `/payments/${paymentId}`
-      )
+    if (payment.captured) {
+      return { data: data as Record<string, unknown> }
+    }
 
-      if (payment.captured) {
-        return { session_data: data as Record<string, unknown> }
-      }
+    await this.razorpayRequest("POST", `/payments/${paymentId}/capture`, {
+      amount: payment.amount,
+      currency: payment.currency,
+    })
 
-      // Capture the payment
-      await this.razorpayRequest("POST", `/payments/${paymentId}/capture`, {
-        amount: payment.amount,
-        currency: payment.currency,
-      })
-
-      return {
-        session_data: {
-          ...(data as Record<string, unknown>),
-          captured: true,
-        },
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_capture_error",
-        detail: error,
-      }
+    return {
+      data: {
+        ...(data as Record<string, unknown>),
+        captured: true,
+      },
     }
   }
 
   async cancelPayment(
     input: CancelPaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    return {
-      session_data: input.data as Record<string, unknown>,
-    }
+  ): Promise<CancelPaymentOutput> {
+    return { data: input.data as Record<string, unknown> }
   }
 
   async refundPayment(
     input: RefundPaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  ): Promise<RefundPaymentOutput> {
     const { data, amount } = input
+    const paymentId = (data as Record<string, string>)?.razorpay_payment_id
 
-    try {
-      const paymentId = (data as Record<string, string>)?.razorpay_payment_id
+    if (!paymentId) {
+      return { data: data as Record<string, unknown> }
+    }
 
-      if (!paymentId) {
-        return {
-          error: "No payment ID for refund",
-          code: "razorpay_refund_error",
-          detail: "Missing razorpay_payment_id in payment data",
-        }
-      }
+    const amountInPaise = Math.round(Number(amount) * 100)
+    const refund = await this.razorpayRequest<{ id: string; status: string }>(
+      "POST",
+      `/payments/${paymentId}/refund`,
+      { amount: amountInPaise }
+    )
 
-      const refund = await this.razorpayRequest<{ id: string; status: string }>(
-        "POST",
-        `/payments/${paymentId}/refund`,
-        {
-          amount: Math.round(amount * 100),
-        }
-      )
-
-      return {
-        session_data: {
-          ...(data as Record<string, unknown>),
-          refund_id: refund.id,
-          refunded: true,
-        },
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_refund_error",
-        detail: error,
-      }
+    return {
+      data: {
+        ...(data as Record<string, unknown>),
+        refund_id: refund.id,
+        refunded: true,
+      },
     }
   }
 
   async deletePayment(
     _input: DeletePaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    return { session_data: {} }
+  ): Promise<DeletePaymentOutput> {
+    return { data: {} }
   }
 
   async updatePayment(
     input: UpdatePaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  ): Promise<UpdatePaymentOutput> {
     const { amount, currency_code, context } = input
+    const amountInPaise = Math.round(Number(amount) * 100)
+    const order = await this.razorpayRequest<RazorpayOrder>("POST", "/orders", {
+      amount: amountInPaise,
+      currency: currency_code.toUpperCase(),
+      receipt: `order_${Date.now()}`,
+      notes: {
+        cart_id: (context as Record<string, string>)?.cart_id || "",
+      },
+    })
 
-    try {
-      const order = await this.razorpayRequest<RazorpayOrder>("POST", "/orders", {
-        amount: Math.round(amount * 100),
-        currency: currency_code.toUpperCase(),
-        receipt: `order_${Date.now()}`,
-        notes: {
-          cart_id: (context as Record<string, string>)?.cart_id || "",
-        },
-      })
-
-      return {
-        session_data: {
-          razorpay_order_id: order.id,
-          key_id: this.options_.key_id,
-          amount: order.amount,
-          currency: order.currency,
-          status: order.status,
-        },
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_update_error",
-        detail: error,
-      }
+    return {
+      data: {
+        id: order.id,
+        key_id: this.options_.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        status: order.status,
+      },
     }
   }
 
   async retrievePayment(
     input: RetrievePaymentInput
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
+  ): Promise<RetrievePaymentOutput> {
     const { data } = input
+    const orderId = (data as Record<string, string>)?.id || (data as Record<string, string>)?.razorpay_order_id
 
-    try {
-      const orderId = (data as Record<string, string>)?.razorpay_order_id
+    if (!orderId) {
+      return { data: data as Record<string, unknown> }
+    }
 
-      if (!orderId) {
-        return { session_data: data as Record<string, unknown> }
-      }
+    const order = await this.razorpayRequest<RazorpayOrder>(
+      "GET",
+      `/orders/${orderId}`
+    )
 
-      const order = await this.razorpayRequest<RazorpayOrder>(
-        "GET",
-        `/orders/${orderId}`
-      )
-
-      return {
-        session_data: {
-          ...(data as Record<string, unknown>),
-          status: order.status,
-        },
-      }
-    } catch (error) {
-      return {
-        error: (error as Error).message,
-        code: "razorpay_retrieve_error",
-        detail: error,
-      }
+    return {
+      data: {
+        ...(data as Record<string, unknown>),
+        status: order.status,
+      },
     }
   }
 
   async getPaymentStatus(
     input: GetPaymentStatusInput
-  ): Promise<{ status: string }> {
+  ): Promise<GetPaymentStatusOutput> {
     const { data } = input
 
-    try {
-      const paymentId = (data as Record<string, string>)?.razorpay_payment_id
-      const orderId = (data as Record<string, string>)?.razorpay_order_id
+    const paymentId = (data as Record<string, string>)?.razorpay_payment_id
+    const orderId = (data as Record<string, string>)?.id || (data as Record<string, string>)?.razorpay_order_id
 
+    try {
       if (paymentId) {
         const payment = await this.razorpayRequest<RazorpayPayment>(
           "GET",
           `/payments/${paymentId}`
         )
-        if (payment.captured) return { status: "captured" }
-        if (payment.status === "authorized") return { status: "authorized" }
-        if (payment.status === "failed") return { status: "error" }
+        if (payment.captured) return { status: "captured" as PaymentSessionStatus }
+        if (payment.status === "authorized") return { status: "authorized" as PaymentSessionStatus }
+        if (payment.status === "failed") return { status: "error" as PaymentSessionStatus }
       }
 
       if (orderId) {
@@ -369,14 +319,14 @@ class RazorpayProviderService extends AbstractPaymentProvider<Options> {
           "GET",
           `/orders/${orderId}`
         )
-        if (order.status === "paid") return { status: "captured" }
-        if (order.status === "attempted") return { status: "authorized" }
+        if (order.status === "paid") return { status: "captured" as PaymentSessionStatus }
+        if (order.status === "attempted") return { status: "authorized" as PaymentSessionStatus }
       }
-
-      return { status: "pending" }
     } catch {
-      return { status: "error" }
+      return { status: "error" as PaymentSessionStatus }
     }
+
+    return { status: "pending" as PaymentSessionStatus }
   }
 
   async getWebhookActionAndData(
@@ -385,24 +335,35 @@ class RazorpayProviderService extends AbstractPaymentProvider<Options> {
     const { data } = payload
     const event = (data as Record<string, string>)?.event
 
+    type RazorpayWebhookPayload = {
+      payload?: {
+        payment?: {
+          entity?: {
+            order_id?: string
+            amount?: number
+          }
+        }
+      }
+    }
+
     if (event === "payment.captured") {
-      const paymentEntity = (data as Record<string, Record<string, unknown>>)?.payload?.payment?.entity
+      const entity = (data as RazorpayWebhookPayload)?.payload?.payment?.entity
       return {
         action: "captured",
         data: {
-          session_id: String(paymentEntity?.order_id || ""),
-          amount: Number(paymentEntity?.amount || 0) / 100,
+          session_id: String(entity?.order_id || ""),
+          amount: Number(entity?.amount || 0) / 100,
         },
       }
     }
 
     if (event === "payment.failed") {
-      const paymentEntity = (data as Record<string, Record<string, unknown>>)?.payload?.payment?.entity
+      const entity = (data as RazorpayWebhookPayload)?.payload?.payment?.entity
       return {
         action: "failed",
         data: {
-          session_id: String(paymentEntity?.order_id || ""),
-          amount: Number(paymentEntity?.amount || 0) / 100,
+          session_id: String(entity?.order_id || ""),
+          amount: Number(entity?.amount || 0) / 100,
         },
       }
     }

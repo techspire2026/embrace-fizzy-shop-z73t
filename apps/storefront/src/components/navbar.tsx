@@ -10,9 +10,8 @@ import {
 } from "@/components/ui/drawer"
 import { getCountryCodeFromPath } from "@/lib/utils/region"
 import { Link, useLocation } from "@tanstack/react-router"
-import { EllipsisHorizontal, ShoppingCart } from "@medusajs/icons"
+import { EllipsisHorizontal } from "@medusajs/icons"
 import { useState, useEffect } from "react"
-import { useCartDrawer } from "@/lib/hooks/use-cart-drawer"
 
 export const Navbar = () => {
   const location = useLocation()
@@ -21,7 +20,6 @@ export const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [scrolled, setScrolled] = useState(false)
-  const { openDrawer } = useCartDrawer()
 
   useEffect(() => {
     const handleScroll = () => {
