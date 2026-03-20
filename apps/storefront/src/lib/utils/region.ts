@@ -38,6 +38,12 @@ export function getCountryCodeFromPath(pathname: string): string | undefined {
 // ============ DEFAULT COUNTRY CODE ============
 
 export default function getDefaultCountryCode(regions: HttpTypes.StoreRegion[]): string | undefined {
+  // Prefer India as the primary market
+  const indiaRegion = regions.find((r) =>
+    r.countries?.some((c) => c.iso_2 === "in")
+  )
+  if (indiaRegion) return "in"
+
   let defaultCountryCode = undefined
   regions.some((r) => {
     defaultCountryCode = r.countries?.[0]?.iso_2
