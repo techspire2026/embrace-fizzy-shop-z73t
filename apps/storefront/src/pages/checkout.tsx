@@ -70,23 +70,21 @@ const Checkout = () => {
   )
 
   useEffect(() => {
-    // Determine which step to show based on cart state
+    // Only redirect if the cart is loaded and not currently fetching.
+    // We deliberately do NOT redirect backwards when the cart query refetches
+    // after a mutation (e.g. after saving addresses), because the stale cart
+    // data would incorrectly make steps appear incomplete during the brief
+    // window between navigation and cache invalidation completing.
     if (!cart) {
       return
     }
 
+    // Only guard forward jumps: if the user somehow lands on a later step
+    // without completing the prerequisites, send them to the earliest
+    // incomplete step. We never push them back from a step they just
+    // navigated to via onNext().
     if (
-      step !== CheckoutStepKey.ADDRESSES &&
-      currentStepIndex >= 0 &&
-      !steps[0].completed
-    ) {
-      goToStep(CheckoutStepKey.ADDRESSES)
-      return
-    }
-
-    if (
-      step !== CheckoutStepKey.DELIVERY &&
-      currentStepIndex >= 1 &&
+      step === CheckoutStepKey.PAYMENT &&
       !steps[1].completed
     ) {
       goToStep(CheckoutStepKey.DELIVERY)
@@ -94,14 +92,13 @@ const Checkout = () => {
     }
 
     if (
-      step !== CheckoutStepKey.PAYMENT &&
-      currentStepIndex >= 2 &&
+      step === CheckoutStepKey.REVIEW &&
       !steps[2].completed
     ) {
       goToStep(CheckoutStepKey.PAYMENT)
       return
     }
-  }, [cart, steps, step, currentStepIndex, goToStep])
+  }, [cart, steps, step, goToStep])
 
   const handleNext = () => {
     const nextIndex = currentStepIndex + 1

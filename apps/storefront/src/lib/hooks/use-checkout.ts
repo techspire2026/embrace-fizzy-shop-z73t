@@ -3,7 +3,7 @@ import { queryKeys } from "@/lib/utils/query-keys"
 import { sdk } from "@/lib/utils/sdk"
 import { getStoredCart, removeStoredCart } from "@/lib/utils/cart"
 
-const DEFAULT_CART_FIELDS = "+items.total, shipping_methods.name"
+const DEFAULT_CART_FIELDS = "+items.total, shipping_methods.name, +shipping_address, +billing_address, +payment_collection.payment_sessions"
 
 // ============ ADDRESSES ============
 
