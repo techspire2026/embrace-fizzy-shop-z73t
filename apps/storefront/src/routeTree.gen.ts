@@ -32,6 +32,9 @@ import { Route as CountryCodeBlogRouteImport } from './routes/$countryCode/blog'
 import { Route as CountryCodeAccountRouteImport } from './routes/$countryCode/account'
 import { Route as CountryCodeAboutRouteImport } from './routes/$countryCode/about'
 import { Route as CountryCodeAccountIndexRouteImport } from './routes/$countryCode/account/index'
+import { Route as ApiWhatsappStartRouteImport } from './routes/api/whatsapp/start'
+import { Route as ApiWhatsappSendRouteImport } from './routes/api/whatsapp/send'
+import { Route as ApiWhatsappMessagesRouteImport } from './routes/api/whatsapp/messages'
 import { Route as CountryCodeProductsHandleRouteImport } from './routes/$countryCode/products/$handle'
 import { Route as CountryCodeCollectionsHandleRouteImport } from './routes/$countryCode/collections/$handle'
 import { Route as CountryCodeCategoriesHandleRouteImport } from './routes/$countryCode/categories/$handle'
@@ -154,6 +157,21 @@ const CountryCodeAccountIndexRoute = CountryCodeAccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CountryCodeAccountRoute,
 } as any)
+const ApiWhatsappStartRoute = ApiWhatsappStartRouteImport.update({
+  id: '/api/whatsapp/start',
+  path: '/api/whatsapp/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWhatsappSendRoute = ApiWhatsappSendRouteImport.update({
+  id: '/api/whatsapp/send',
+  path: '/api/whatsapp/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWhatsappMessagesRoute = ApiWhatsappMessagesRouteImport.update({
+  id: '/api/whatsapp/messages',
+  path: '/api/whatsapp/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CountryCodeProductsHandleRoute =
   CountryCodeProductsHandleRouteImport.update({
     id: '/products/$handle',
@@ -217,6 +235,9 @@ export interface FileRoutesByFullPath {
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
+  '/api/whatsapp/messages': typeof ApiWhatsappMessagesRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
+  '/api/whatsapp/start': typeof ApiWhatsappStartRoute
   '/$countryCode/account/': typeof CountryCodeAccountIndexRoute
   '/$countryCode/account/orders/$orderId': typeof CountryCodeAccountOrdersOrderIdRoute
   '/$countryCode/order/$orderId/confirmed': typeof CountryCodeOrderOrderIdConfirmedRoute
@@ -246,6 +267,9 @@ export interface FileRoutesByTo {
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
+  '/api/whatsapp/messages': typeof ApiWhatsappMessagesRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
+  '/api/whatsapp/start': typeof ApiWhatsappStartRoute
   '/$countryCode/account': typeof CountryCodeAccountIndexRoute
   '/$countryCode/account/orders/$orderId': typeof CountryCodeAccountOrdersOrderIdRoute
   '/$countryCode/order/$orderId/confirmed': typeof CountryCodeOrderOrderIdConfirmedRoute
@@ -278,6 +302,9 @@ export interface FileRoutesById {
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
+  '/api/whatsapp/messages': typeof ApiWhatsappMessagesRoute
+  '/api/whatsapp/send': typeof ApiWhatsappSendRoute
+  '/api/whatsapp/start': typeof ApiWhatsappStartRoute
   '/$countryCode/account/': typeof CountryCodeAccountIndexRoute
   '/$countryCode/account/orders/$orderId': typeof CountryCodeAccountOrdersOrderIdRoute
   '/$countryCode/order/$orderId/confirmed': typeof CountryCodeOrderOrderIdConfirmedRoute
@@ -311,6 +338,9 @@ export interface FileRouteTypes {
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
+    | '/api/whatsapp/messages'
+    | '/api/whatsapp/send'
+    | '/api/whatsapp/start'
     | '/$countryCode/account/'
     | '/$countryCode/account/orders/$orderId'
     | '/$countryCode/order/$orderId/confirmed'
@@ -340,6 +370,9 @@ export interface FileRouteTypes {
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
+    | '/api/whatsapp/messages'
+    | '/api/whatsapp/send'
+    | '/api/whatsapp/start'
     | '/$countryCode/account'
     | '/$countryCode/account/orders/$orderId'
     | '/$countryCode/order/$orderId/confirmed'
@@ -371,6 +404,9 @@ export interface FileRouteTypes {
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
+    | '/api/whatsapp/messages'
+    | '/api/whatsapp/send'
+    | '/api/whatsapp/start'
     | '/$countryCode/account/'
     | '/$countryCode/account/orders/$orderId'
     | '/$countryCode/order/$orderId/confirmed'
@@ -385,6 +421,9 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   HealthRoute: typeof HealthRoute
   StoreRoute: typeof StoreRoute
+  ApiWhatsappMessagesRoute: typeof ApiWhatsappMessagesRoute
+  ApiWhatsappSendRoute: typeof ApiWhatsappSendRoute
+  ApiWhatsappStartRoute: typeof ApiWhatsappStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -550,6 +589,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CountryCodeAccountIndexRouteImport
       parentRoute: typeof CountryCodeAccountRoute
     }
+    '/api/whatsapp/start': {
+      id: '/api/whatsapp/start'
+      path: '/api/whatsapp/start'
+      fullPath: '/api/whatsapp/start'
+      preLoaderRoute: typeof ApiWhatsappStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/whatsapp/send': {
+      id: '/api/whatsapp/send'
+      path: '/api/whatsapp/send'
+      fullPath: '/api/whatsapp/send'
+      preLoaderRoute: typeof ApiWhatsappSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/whatsapp/messages': {
+      id: '/api/whatsapp/messages'
+      path: '/api/whatsapp/messages'
+      fullPath: '/api/whatsapp/messages'
+      preLoaderRoute: typeof ApiWhatsappMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$countryCode/products/$handle': {
       id: '/$countryCode/products/$handle'
       path: '/products/$handle'
@@ -666,6 +726,9 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   HealthRoute: HealthRoute,
   StoreRoute: StoreRoute,
+  ApiWhatsappMessagesRoute: ApiWhatsappMessagesRoute,
+  ApiWhatsappSendRoute: ApiWhatsappSendRoute,
+  ApiWhatsappStartRoute: ApiWhatsappStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

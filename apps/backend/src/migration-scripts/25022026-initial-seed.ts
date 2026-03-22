@@ -21,6 +21,12 @@ import {
 } from "@medusajs/medusa/core-flows";
 import { CreateProductCategoryDTO, CreateProductCollectionDTO } from "@medusajs/types";
 
+// ============================================================
+// Embrace Nutrition – Probiotic Fizzy Drinks
+// Products sourced from https://www.embracenutrition.in/
+// Currency: INR (Indian Rupee) – default
+// ============================================================
+
 
 export default async function migration_25022026_initial_seed({
     container,
@@ -60,10 +66,10 @@ export default async function migration_25022026_initial_seed({
             selector: { id: store.id },
             update: {
                 supported_currencies: [
-                    { currency_code: "usd", is_default: true },
+                    { currency_code: "inr", is_default: true },
+                    { currency_code: "usd" },
                     { currency_code: "eur", is_tax_inclusive: true },
                     { currency_code: "gbp", is_tax_inclusive: true },
-                    { currency_code: "dkk", is_tax_inclusive: true },
                 ],
                 default_sales_channel_id: defaultSalesChannel[0].id,
             },
@@ -81,6 +87,14 @@ export default async function migration_25022026_initial_seed({
             {
                 input: {
                     regions: [
+                        {
+                            name: "India",
+                            currency_code: "inr",
+                            countries: ["in"],
+                            payment_providers: ["pp_system_default", "pp_razorpay_razorpay"],
+                            automatic_taxes: false,
+                            is_tax_inclusive: false,
+                        },
                         {
                             name: "United States",
                             currency_code: "usd",
@@ -105,14 +119,6 @@ export default async function migration_25022026_initial_seed({
                             automatic_taxes: true,
                             is_tax_inclusive: true,
                         },
-                        {
-                            name: "Denmark",
-                            currency_code: "dkk",
-                            countries: ["dk"],
-                            payment_providers: ["pp_system_default"],
-                            automatic_taxes: true,
-                            is_tax_inclusive: true,
-                        },
                     ],
                 },
             }
@@ -132,7 +138,6 @@ export default async function migration_25022026_initial_seed({
         {
             gb: { rate: 20, code: "GB20", name: "UK VAT" },
             de: { rate: 19, code: "DE19", name: "Germany VAT" },
-            dk: { rate: 25, code: "DK25", name: "Denmark VAT" },
             se: { rate: 25, code: "SE25", name: "Sweden VAT" },
             fr: { rate: 20, code: "FR20", name: "France VAT" },
             es: { rate: 21, code: "ES21", name: "Spain VAT" },
@@ -176,9 +181,9 @@ export default async function migration_25022026_initial_seed({
                     {
                         name: "Main Warehouse",
                         address: {
-                            city: "Copenhagen",
-                            country_code: "DK",
-                            address_1: "123 Main St",
+                            city: "Bangalore",
+                            country_code: "IN",
+                            address_1: "Embrace Nutrition HQ",
                         },
                     },
                 ],
@@ -235,11 +240,8 @@ export default async function migration_25022026_initial_seed({
             service_zones: [
                 {
                     name: "Worldwide",
-                    geo_zones: ["us", "de", "se", "fr", "es", "it", "gb", "dk"].map(
-                        (country_code) => ({
-                            country_code,
-                            type: "country" as const,
-                        })
+                    geo_zones: ["in", "us", "de", "se", "fr", "es", "it", "gb"].map(
+                        (country_code) => ({ type: "country" as const, country_code })
                     ),
                 },
             ],
@@ -281,6 +283,10 @@ export default async function migration_25022026_initial_seed({
                     },
                     prices: [
                         {
+                            currency_code: "inr",
+                            amount: 0,
+                        },
+                        {
                             currency_code: "usd",
                             amount: 0,
                         },
@@ -290,10 +296,6 @@ export default async function migration_25022026_initial_seed({
                         },
                         {
                             currency_code: "gbp",
-                            amount: 0,
-                        },
-                        {
-                            currency_code: "dkk",
                             amount: 0,
                         },
                     ],
@@ -332,19 +334,11 @@ export default async function migration_25022026_initial_seed({
     const categoryHandles = existingCategories.map((c: any) => c.handle);
     const categoriesToCreate: CreateProductCategoryDTO[] = [];
 
-    // Parent categories
-    if (!categoryHandles.includes("tops")) {
+    // Parent category
+    if (!categoryHandles.includes("beverages")) {
         categoriesToCreate.push({
-            name: "Tops",
-            handle: "tops",
-            is_active: true,
-            is_internal: false,
-        });
-    }
-    if (!categoryHandles.includes("bottoms")) {
-        categoriesToCreate.push({
-            name: "Bottoms",
-            handle: "bottoms",
+            name: "Beverages",
+            handle: "beverages",
             is_active: true,
             is_internal: false,
         });
@@ -376,88 +370,23 @@ export default async function migration_25022026_initial_seed({
     // Create nested categories (children)
     const nestedCategoriesToCreate: CreateProductCategoryDTO[] = [];
 
-    // Under Tops
-    if (!categoryHandles.includes("sweatshirts") && categoryMap["tops"]) {
+    // Under Beverages
+    if (!categoryHandles.includes("probiotic-drinks") && categoryMap["beverages"]) {
         nestedCategoriesToCreate.push({
-            name: "Sweatshirts",
-            handle: "sweatshirts",
+            name: "Probiotic Drinks",
+            handle: "probiotic-drinks",
             is_active: true,
             is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
+            parent_category_id: categoryMap["beverages"].id,
         });
     }
-    if (!categoryHandles.includes("long-sleeves") && categoryMap["tops"]) {
+    if (!categoryHandles.includes("variety-packs") && categoryMap["beverages"]) {
         nestedCategoriesToCreate.push({
-            name: "Long Sleeves",
-            handle: "long-sleeves",
+            name: "Variety Packs",
+            handle: "variety-packs",
             is_active: true,
             is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
-        });
-    }
-    if (!categoryHandles.includes("t-shirts") && categoryMap["tops"]) {
-        nestedCategoriesToCreate.push({
-            name: "T-Shirts",
-            handle: "t-shirts",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
-        });
-    }
-    if (!categoryHandles.includes("bras") && categoryMap["tops"]) {
-        nestedCategoriesToCreate.push({
-            name: "Bras",
-            handle: "bras",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
-        });
-    }
-    if (!categoryHandles.includes("jackets") && categoryMap["tops"]) {
-        nestedCategoriesToCreate.push({
-            name: "Jackets",
-            handle: "jackets",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
-        });
-    }
-    if (!categoryHandles.includes("hoodies") && categoryMap["tops"]) {
-        nestedCategoriesToCreate.push({
-            name: "Hoodies",
-            handle: "hoodies",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["tops"].id,
-        });
-    }
-
-    // Under Bottoms
-    if (!categoryHandles.includes("joggers") && categoryMap["bottoms"]) {
-        nestedCategoriesToCreate.push({
-            name: "Joggers",
-            handle: "joggers",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["bottoms"].id,
-        });
-    }
-    if (!categoryHandles.includes("leggings") && categoryMap["bottoms"]) {
-        nestedCategoriesToCreate.push({
-            name: "Leggings",
-            handle: "leggings",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["bottoms"].id,
-        });
-    }
-    if (!categoryHandles.includes("shorts") && categoryMap["bottoms"]) {
-        nestedCategoriesToCreate.push({
-            name: "Shorts",
-            handle: "shorts",
-            is_active: true,
-            is_internal: false,
-            parent_category_id: categoryMap["bottoms"].id,
+            parent_category_id: categoryMap["beverages"].id,
         });
     }
 
@@ -492,22 +421,16 @@ export default async function migration_25022026_initial_seed({
     const collectionHandles = existingCollections.map((c: any) => c.handle);
     const collectionsToCreate: CreateProductCollectionDTO[] = [];
 
-    if (!collectionHandles.includes("core-essentials")) {
+    if (!collectionHandles.includes("signature-flavors")) {
         collectionsToCreate.push({
-            title: "Core Essentials",
-            handle: "core-essentials",
+            title: "Signature Flavors",
+            handle: "signature-flavors",
         });
     }
-    if (!collectionHandles.includes("studio-training")) {
+    if (!collectionHandles.includes("mix-and-match")) {
         collectionsToCreate.push({
-            title: "Studio & Training",
-            handle: "studio-training",
-        });
-    }
-    if (!collectionHandles.includes("outer-layers")) {
-        collectionsToCreate.push({
-            title: "Outer Layers",
-            handle: "outer-layers",
+            title: "Mix & Match",
+            handle: "mix-and-match",
         });
     }
 
@@ -534,181 +457,160 @@ export default async function migration_25022026_initial_seed({
     };
 
     // Helper functions
-    const getAllImages = (colorImages: Record<string, string[]>) => {
-        return Object.values(colorImages).flat();
+    const getAllImages = (variantImages: Record<string, string[]>) => {
+        return Object.values(variantImages).flat();
     };
 
-    const getFirstImage = (colorImages: Record<string, string[]>) => {
-        const firstColor = Object.keys(colorImages)[0];
-        return colorImages[firstColor][0];
+    const getFirstImage = (variantImages: Record<string, string[]>) => {
+        const firstKey = Object.keys(variantImages)[0];
+        return variantImages[firstKey][0];
     };
 
-    // === CREWNECK SWEATSHIRT ===
-    const crewneckSweatshirtImages = {
-        Sand: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck1_1-01KGSCT0CNMZ7V81SH9F15DV6W.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck1_3-01KGSCT1CSXAJXSCZWV57CJPVK.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck1_2-01KGSCT0WNN9SFNV0JWMHV9B72.jpeg",
-        ],
-        Charcoal: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck2_1-01KGSCWGCHNRSDVAYR110F1HHM.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck2_3-01KGSCWH7RYVJD5JG3NY5H319T.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck2_2-01KGSCWGVMKEDRSNHZK5KR9P0E.jpeg",
-        ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck3_2-01KGSCWJ2MA3EH4S03MBY49978.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck3_1-01KGSCWHKH6ZMASJ8CVBEZWCWX.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck3_3-01KGSCWJG2X3QP3PKT4E0K86M0.jpeg",
-        ],
-    };
+    // ============================================================
+    // PRODUCT IMAGES – sourced from embracenutrition.in
+    // ============================================================
 
-    // === RELAXED JOGGER PANT ===
-    const relaxedJoggerImages = {
-        Charcoal: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-2-01KGSBR3R5A1KXA1MBX09R0YJ1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-2-01KGSBR3R5A1KXA1MBX09R0YJ1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-2-01KGSBR0QDAFTZF1RZ3BKEHWNT.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/jogger_3-1--01KGSE8J6J6R4MX4MBXS23A2JQ.jpeg",
+    // === WATERMELON MINT ===
+    const watermelonMintImages = {
+        "Pack of 4": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/139ceaef56c8f741692d3ff23de58b41.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/7f3923962fa04139e46912e83d5acacc.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/352ca236075470e90e1822dae383c97f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/46a9845ff09b60d75616529c218f449f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d36a5e98193a7b7a340889b38faba919.jpeg",
         ],
-    };
-
-    // === RIBBED LONG SLEEVE TOP ===
-    const ribbedLongSleeveImages = {
-        Sand: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt2_front-01KGSE13JNVTDS7FENZXKCFTNX.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt2_zoom-01KGSE1460SM7KTBFME9E0ZM44.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt2_back-01KGSE12WG3NA5HVMVG01QQFNC.jpeg",
+        "Pack of 6": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/139ceaef56c8f741692d3ff23de58b41.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/7f3923962fa04139e46912e83d5acacc.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/352ca236075470e90e1822dae383c97f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/46a9845ff09b60d75616529c218f449f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d36a5e98193a7b7a340889b38faba919.jpeg",
         ],
-        Charcoal: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt_back-01KGSE1B4F15M9FPY40WMVPDD6.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt_zoom-01KGSE1BXYDSPXGBMD9QA8M94B.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/ribbed_shirt_front-01KGSE1BH59AK1ASMZ40JYRM7P.jpeg",
+        "Pack of 12": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/139ceaef56c8f741692d3ff23de58b41.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/7f3923962fa04139e46912e83d5acacc.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/352ca236075470e90e1822dae383c97f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/46a9845ff09b60d75616529c218f449f.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d36a5e98193a7b7a340889b38faba919.jpeg",
         ],
     };
 
-    // === MINIMAL TEE ===
-    const minimalTeeImages = {
-        White: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-3-01KGSBVR4PGHBXD1HDT15MYD9H.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-3-01KGSARG88PY6CNQ15DYNC713F.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-3-01KGSARG88PY6CNQ15DYNC713F.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-3-01KGSBR1478FXAJCGEVGCXQR3C.jpeg",
+    // === PEACH LEMON ===
+    const peachLemonImages = {
+        "Pack of 4": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f8773f9b890ef9c45e105d8c42a7daa.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/b85653ec8be6574f64df0ace53f32651.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/edb4f0b8d442513db8607377d41564cf.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/6244ad3c0875dbb5718aef47c1203047.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d4e19b878077c7971e12eaff677c62a8.jpeg",
         ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-2-01KGSBVTFE71N6CYS8ZQWSNHQD.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-3-01KGSARG88PY6CNQ15DYNC713F.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-2-01KGSC1D3AQKECBVKE4K0AQ9FS.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/crewneck3_3-01KGSEVWEPJMJ9XNNAEGMQEP86.jpeg",
+        "Pack of 6": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f8773f9b890ef9c45e105d8c42a7daa.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/b85653ec8be6574f64df0ace53f32651.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/edb4f0b8d442513db8607377d41564cf.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/6244ad3c0875dbb5718aef47c1203047.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d4e19b878077c7971e12eaff677c62a8.jpeg",
         ],
-        Black: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-9--01KGSC52E48079HX7AR6BA3Q0Z.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-11--01KGSC5418JV4T8KKCQ06CRQP4.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-3-01KGSARG88PY6CNQ15DYNC713F.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-10--01KGSC538TNRBY8DF075E9628Z.jpeg",
-        ],
-    };
-
-    // === LIGHTWEIGHT TRAINING SHORT ===
-    const lightweightTrainingShortImages = {
-        Black: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-4-01KGSARGR6P7GGYFNC9ZPGSVC6.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-4-01KGSBR1FWQYV3EH1C68DKN46C.jpeg",
-        ],
-        Grey: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/jogger2_1-01KGSECPE6WH37YHY5VCY3MT4N.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/jogger2_2-01KGSECPWC73BYC0BZP5MY5410.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/jogger2_3-01KGSECQ8P1BR4WSAVV566P6SY.jpeg",
+        "Pack of 12": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f8773f9b890ef9c45e105d8c42a7daa.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/b85653ec8be6574f64df0ace53f32651.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/edb4f0b8d442513db8607377d41564cf.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/6244ad3c0875dbb5718aef47c1203047.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d4e19b878077c7971e12eaff677c62a8.jpeg",
         ],
     };
 
-    // === RIBBED SPORTS BRA ===
-    const ribbedSportsBraImages = {
-        Sand: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-4-01KGSBVTVHDK8ZJWKRN0D8XY5S.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-5-01KGSARH3BS8408VG20V5NX2HM.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-8-4-01KGSC1FD2MTY826F73904FTPW.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-4-01KGSC1DFVJHYE5YZJ47MQWXZD.jpeg",
+    // === LEMON GINGER ===
+    const lemonGingerImages = {
+        "Pack of 4": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f1c69f6c0891f20d3a24b164c5ac5fe.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/94ddaf878fc20a10e45834e352405584.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8dd0b8331ce8db58a6b92ee6ca535a32.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/719f2840d3e5b7134e99b557f42265ea.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8b5f97d1387ac901e31d969e9410e140.jpeg",
         ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-5-01KGSBR1VJXZMB9YQZ0DEYVT7V.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-5-01KGSARH3BS8408VG20V5NX2HM.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-5-01KGSBVRGRRAC9K0NSHKDRJY0Y.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-5-01KGSARH3BS8408VG20V5NX2HM.jpeg",
+        "Pack of 6": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f1c69f6c0891f20d3a24b164c5ac5fe.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/94ddaf878fc20a10e45834e352405584.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8dd0b8331ce8db58a6b92ee6ca535a32.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/719f2840d3e5b7134e99b557f42265ea.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8b5f97d1387ac901e31d969e9410e140.jpeg",
         ],
-    };
-
-    // === PERFORMANCE LEGGING ===
-    const performanceLeggingImages = {
-        Charcoal: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-6-01KGSBR27V7F3G07P6NTSC1H0M.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-6-01KGSARHJNHSYSQP485SD61SV2.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-6-01KGSBVRY578V8GYVJ8PANB25S.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-6-01KGSBR27V7F3G07P6NTSC1H0M.jpeg",
-        ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-5-01KGSC1DWZQZVQV7CNYPNSRNFN.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-8-5-01KGSC1FRSG8GV7QHN8XSHA9SN.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-5-01KGSBVV8EJC8CRAFQQKDXAX75.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-6-01KGSBR27V7F3G07P6NTSC1H0M.jpeg",
+        "Pack of 12": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/8f1c69f6c0891f20d3a24b164c5ac5fe.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/94ddaf878fc20a10e45834e352405584.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8dd0b8331ce8db58a6b92ee6ca535a32.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/719f2840d3e5b7134e99b557f42265ea.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/8b5f97d1387ac901e31d969e9410e140.jpeg",
         ],
     };
 
-    // === STUDIO ZIP JACKET ===
-    const studioZipJacketImages = {
-        Black: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-6-01KGSBVVMJHTEN9YGKS1PVEGY1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-6-01KGSBVVMJHTEN9YGKS1PVEGY1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-8-6-01KGSC1G51R6D791THRRYZYZ7E.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-6-01KGSC1E9SD81SDHXEKX1RX5F9.jpeg",
+    // === FRUIT BEER ===
+    const fruitBeerImages = {
+        "Pack of 4": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/7a5749e35bfbb7f5fcd1ae3c3e1147ac.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/bd52641d9d4d4e218cbca7a2d83d41d1.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/02614cbdbacde3b482e90ae3746ea558.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/a4226c181bc2ef21764d442b72c2eed9.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d03a201ae8d3ba986f5113ca90b9eae4.jpeg",
         ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-7-01KGSBVSA92HNH0S83YZ3ZHJVV.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-7-01KGSBQZDY0NTTDEEEW3PGR10N.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-6-01KGSBVVMJHTEN9YGKS1PVEGY1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-7-01KGSBR2KFFSHAY2EC2XKY00NR.jpeg",
+        "Pack of 6": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/7a5749e35bfbb7f5fcd1ae3c3e1147ac.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/bd52641d9d4d4e218cbca7a2d83d41d1.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/02614cbdbacde3b482e90ae3746ea558.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/a4226c181bc2ef21764d442b72c2eed9.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d03a201ae8d3ba986f5113ca90b9eae4.jpeg",
         ],
-    };
-
-    // === MOVEMENT WINDBREAKER ===
-    const movementWindbreakerImages = {
-        Sand: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-8-01KGSBR2ZZAKW4P5Y9JK18MWHG.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-8-01KGSBQZYP0GF1K8X1XWSR52Q7.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-8-01KGSBVSP59A7XHDG28ZWPFM1J.jpeg",
-        ],
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-7-01KGSBVW0V6AJQ8DRTWYHWV45N.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-7-01KGSC1ENQZ7MDWG2NTET6P4HT.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-8-7-01KGSC1GRS18BZ8TWTF63VB8DV.jpeg",
+        "Pack of 12": [
+            "https://www.embracenutrition.in/uploads/product_image/102025/7a5749e35bfbb7f5fcd1ae3c3e1147ac.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/bd52641d9d4d4e218cbca7a2d83d41d1.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/02614cbdbacde3b482e90ae3746ea558.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/a4226c181bc2ef21764d442b72c2eed9.jpeg",
+            "https://www.embracenutrition.in/uploads/product_image/102025/d03a201ae8d3ba986f5113ca90b9eae4.jpeg",
         ],
     };
 
-    // === TRAVEL HOODIE ===
-    const travelHoodieImages = {
-        "Off-White": [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-3-9-01KGSBR0AAFDBNH7ZJKJVMC1N6.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-5-9-01KGSBVT29E00TB0Q4F7147S8T.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-4-9-01KGSBR3BD9WBQ0YEC44M6M9JZ.jpeg",
+    // === TRIPLE TREAT PACK (6 Pack) ===
+    const tripleTreatPackImages = {
+        "6 Pack": [
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/9fe57e1ceef5a1df340fcf4f5a7f5743.jpg",
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/488d5c4acecee12f87e3bafd9dd7f6f7.jpg",
         ],
     };
 
-    // === QUILTED RECOVERY VEST ===
-    const quiltedRecoveryVestImages = {
-        Charcoal: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-7-8-01KGSC1F0YEC3PY0DWMP4G1JRT.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-6-8-01KGSC1CPN09ERH9B7N1G4RBFW.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-8-8-01KGSC5152ASPD1NJZ94JVHKJ8.jpeg",
+    // === EMBRACE MOOD MIX PACK (8 Pack) ===
+    const moodMixPackImages = {
+        "8 Pack": [
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/c004853b054ec94d85a0e3fc71f8fc9e.jpg",
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/af836a2620b06e731a35f0272b59b359.jpg",
         ],
     };
 
-    // === WARM-UP OVERSHIRT ===
-    const warmUpOvershirtImages = {
-        Olive: [
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-9-2-01KGSC51ZZC5J8095Q3TDHBYJ1.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-11-2-01KGSC53MK9CFA4YD05M2J3VWS.jpeg",
-            "https://cdn.mignite.app/ws/works_01KGFKTHDC6ZD3WS7GQTX8992N/-NanoBanana-2026-02-05-10-2-01KGSC52W409H3Q50JC02JV0BR.jpeg",
+    // === LEMON GINGER + PEACH LEMON (6 Pack) ===
+    const lgPlPackImages = {
+        "6 Pack": [
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/6658bf07a2d7d77524b5b8d6a3a89e08.jpg",
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/ad198fee0f0160f5e2a10437bf132a38.jpg",
         ],
     };
+
+    // === LEMON GINGER + WATERMELON (6 Pack) ===
+    const lgWmPackImages = {
+        "6 Pack": [
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/2ab0d938d7663a6f467c3869bc4fb37d.jpg",
+            "https://www.embracenutrition.in/uploads/variety_pack/102025/8c35925cc5236c540ae98b78ffe3cf63.jpg",
+        ],
+    };
+
+    // ============================================================
+    // Helper to build INR + USD/EUR/GBP prices
+    // ============================================================
+    const buildPrices = (inr: number, usd: number, eur: number, gbp: number) => [
+        { currency_code: "inr", amount: inr },
+        { currency_code: "usd", amount: usd },
+        { currency_code: "eur", amount: eur },
+        { currency_code: "gbp", amount: gbp },
+    ];
 
     // Seed products
     const { data: existingProducts } = await query.graph({
@@ -719,1321 +621,299 @@ export default async function migration_25022026_initial_seed({
     const existingHandles = existingProducts.map((p: any) => p.handle);
 
     const productsToCreate = [
+        // ===========================================================
+        // INDIVIDUAL FLAVORS
+        // ===========================================================
         {
-            title: "Crewneck Sweatshirt",
-            handle: "crewneck-sweatshirt",
-            subtitle: "Crewneck sweatshirt",
+            title: "Watermelon Mint",
+            handle: "watermelon-mint",
+            subtitle: "Probiotic Sparkling Drink",
             description:
-                "A heavyweight crewneck designed for everyday comfort with a structured, premium feel.",
+                "Bold watermelon meets refreshing mint in every sip. Lightly sparkling, gut-friendly, and crafted with prebiotics and dietary fiber. A naturally low-sugar fizz designed to nourish your gut while delighting your taste buds. Perfect with meals, as a mixer, or as your daily refresher.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("sweatshirts")
-                ? [getCategoryId("sweatshirts")!]
+            category_ids: getCategoryId("probiotic-drinks")
+                ? [getCategoryId("probiotic-drinks")!]
                 : [],
-            collection_id: getCollectionId("core-essentials"),
-            thumbnail: getFirstImage(crewneckSweatshirtImages),
-            images: getAllImages(crewneckSweatshirtImages).map((url) => ({ url })),
+            collection_id: getCollectionId("signature-flavors"),
+            thumbnail: getFirstImage(watermelonMintImages),
+            images: getAllImages(watermelonMintImages).map((url) => ({ url })),
             options: [
-                { title: "Color", values: ["Sand", "Charcoal", "Olive"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
+                { title: "Pack Size", values: ["Pack of 4", "Pack of 6", "Pack of 12"] },
             ],
             variants: [
                 {
-                    title: "S / Sand",
-                    sku: "ESS-CREW-SAND-S",
+                    title: "Pack of 4",
+                    sku: "WM-4PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
+                    options: { "Pack Size": "Pack of 4" },
+                    prices: buildPrices(389, 5, 5, 4),
                 },
                 {
-                    title: "M / Sand",
-                    sku: "ESS-CREW-SAND-M",
+                    title: "Pack of 6",
+                    sku: "WM-6PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
+                    options: { "Pack Size": "Pack of 6" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
                 {
-                    title: "L / Sand",
-                    sku: "ESS-CREW-SAND-L",
+                    title: "Pack of 12",
+                    sku: "WM-12PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "XL / Sand",
-                    sku: "ESS-CREW-SAND-XL",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "S / Charcoal",
-                    sku: "ESS-CREW-CHAR-S",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "M / Charcoal",
-                    sku: "ESS-CREW-CHAR-M",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "L / Charcoal",
-                    sku: "ESS-CREW-CHAR-L",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "XL / Charcoal",
-                    sku: "ESS-CREW-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "ESS-CREW-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "ESS-CREW-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "ESS-CREW-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "ESS-CREW-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
+                    options: { "Pack Size": "Pack of 12" },
+                    prices: buildPrices(1099, 13, 12, 11),
                 },
             ],
-            variantImageMap: crewneckSweatshirtImages,
+            variantImageMap: watermelonMintImages,
         },
         {
-            title: "Relaxed Jogger Pant",
-            handle: "relaxed-jogger-pant",
-            subtitle: "Relaxed jogger pant",
+            title: "Peach Lemon",
+            handle: "peach-lemon",
+            subtitle: "Probiotic Sparkling Drink",
             description:
-                "Minimalist joggers with a tailored silhouette—ideal for travel or downtime.",
+                "Sweet peach and zesty lemon meet in this irresistibly refreshing fizz. Low sugar, gut-friendly, and packed with prebiotics and 6.25g of dietary fiber. A crush-worthy drink for any time of day — solo, with food, or as a sparkling mocktail base.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("joggers") ? [getCategoryId("joggers")!] : [],
-            collection_id: getCollectionId("core-essentials"),
-            thumbnail: getFirstImage(relaxedJoggerImages),
-            images: getAllImages(relaxedJoggerImages).map((url) => ({ url })),
-            options: [
-                { title: "Color", values: ["Charcoal"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-            ],
-            variants: [
-                {
-                    title: "S / Charcoal",
-                    sku: "RLX-JOG-CHAR-S",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "M / Charcoal",
-                    sku: "RLX-JOG-CHAR-M",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "L / Charcoal",
-                    sku: "RLX-JOG-CHAR-L",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "XL / Charcoal",
-                    sku: "RLX-JOG-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-            ],
-            variantImageMap: relaxedJoggerImages,
-        },
-        {
-            title: "Ribbed Long Sleeve Top",
-            handle: "ribbed-long-sleeve-top",
-            subtitle: "Ribbed long sleeve top",
-            description:
-                "A refined layering piece with subtle rib texture and stretch.",
-            status: "published" as const,
-            is_giftcard: false,
-            discountable: true,
-            category_ids: getCategoryId("long-sleeves")
-                ? [getCategoryId("long-sleeves")!]
+            category_ids: getCategoryId("probiotic-drinks")
+                ? [getCategoryId("probiotic-drinks")!]
                 : [],
-            collection_id: getCollectionId("core-essentials"),
-            thumbnail: getFirstImage(ribbedLongSleeveImages),
-            images: getAllImages(ribbedLongSleeveImages).map((url) => ({ url })),
+            collection_id: getCollectionId("signature-flavors"),
+            thumbnail: getFirstImage(peachLemonImages),
+            images: getAllImages(peachLemonImages).map((url) => ({ url })),
             options: [
-                { title: "Color", values: ["Sand", "Charcoal"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
+                { title: "Pack Size", values: ["Pack of 4", "Pack of 6", "Pack of 12"] },
             ],
             variants: [
                 {
-                    title: "S / Sand",
-                    sku: "RIB-LS-SAND-S",
+                    title: "Pack of 4",
+                    sku: "PL-4PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
+                    options: { "Pack Size": "Pack of 4" },
+                    prices: buildPrices(389, 5, 5, 4),
                 },
                 {
-                    title: "M / Sand",
-                    sku: "RIB-LS-SAND-M",
+                    title: "Pack of 6",
+                    sku: "PL-6PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
+                    options: { "Pack Size": "Pack of 6" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
                 {
-                    title: "L / Sand",
-                    sku: "RIB-LS-SAND-L",
+                    title: "Pack of 12",
+                    sku: "PL-12PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
-                },
-                {
-                    title: "XL / Sand",
-                    sku: "RIB-LS-SAND-XL",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
-                },
-                {
-                    title: "S / Charcoal",
-                    sku: "RIB-LS-CHAR-S",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
-                },
-                {
-                    title: "M / Charcoal",
-                    sku: "RIB-LS-CHAR-M",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
-                },
-                {
-                    title: "L / Charcoal",
-                    sku: "RIB-LS-CHAR-L",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
-                },
-                {
-                    title: "XL / Charcoal",
-                    sku: "RIB-LS-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 58 },
-                        { currency_code: "eur", amount: 58 },
-                        { currency_code: "gbp", amount: 49 },
-                        { currency_code: "dkk", amount: 432 },
-                    ],
+                    options: { "Pack Size": "Pack of 12" },
+                    prices: buildPrices(1099, 13, 12, 11),
                 },
             ],
-            variantImageMap: ribbedLongSleeveImages,
+            variantImageMap: peachLemonImages,
         },
         {
-            title: "Minimal Tee",
-            handle: "minimal-tee",
-            subtitle: "Minimal tee",
+            title: "Lemon Ginger",
+            handle: "lemon-ginger",
+            subtitle: "Probiotic Sparkling Drink",
             description:
-                "Ultra-soft everyday tee with a clean neckline and athletic drape.",
+                "Bright lemon with a warm ginger kick — a bold sparkling fizz that awakens every sip. Prebiotic-rich, low in sugar, and loaded with 6.25g of dietary fiber. A zingy daily ritual that's as good for your gut as it is for your mood.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("t-shirts")
-                ? [getCategoryId("t-shirts")!]
+            category_ids: getCategoryId("probiotic-drinks")
+                ? [getCategoryId("probiotic-drinks")!]
                 : [],
-            collection_id: getCollectionId("core-essentials"),
-            thumbnail: getFirstImage(minimalTeeImages),
-            images: getAllImages(minimalTeeImages).map((url) => ({ url })),
+            collection_id: getCollectionId("signature-flavors"),
+            thumbnail: getFirstImage(lemonGingerImages),
+            images: getAllImages(lemonGingerImages).map((url) => ({ url })),
             options: [
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-                { title: "Color", values: ["White", "Olive", "Black"] },
+                { title: "Pack Size", values: ["Pack of 4", "Pack of 6", "Pack of 12"] },
             ],
             variants: [
                 {
-                    title: "S / White",
-                    sku: "MIN-TEE-WHT-S",
+                    title: "Pack of 4",
+                    sku: "LG-4PACK",
                     manage_inventory: false,
-                    options: { Color: "White", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
+                    options: { "Pack Size": "Pack of 4" },
+                    prices: buildPrices(389, 5, 5, 4),
                 },
                 {
-                    title: "M / White",
-                    sku: "MIN-TEE-WHT-M",
+                    title: "Pack of 6",
+                    sku: "LG-6PACK",
                     manage_inventory: false,
-                    options: { Color: "White", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
+                    options: { "Pack Size": "Pack of 6" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
                 {
-                    title: "L / White",
-                    sku: "MIN-TEE-WHT-L",
+                    title: "Pack of 12",
+                    sku: "LG-12PACK",
                     manage_inventory: false,
-                    options: { Color: "White", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "XL / White",
-                    sku: "MIN-TEE-WHT-XL",
-                    manage_inventory: false,
-                    options: { Color: "White", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "MIN-TEE-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "MIN-TEE-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "MIN-TEE-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "MIN-TEE-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "S / Black",
-                    sku: "MIN-TEE-BLK-S",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "M / Black",
-                    sku: "MIN-TEE-BLK-M",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "L / Black",
-                    sku: "MIN-TEE-BLK-L",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
-                },
-                {
-                    title: "XL / Black",
-                    sku: "MIN-TEE-BLK-XL",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 38 },
-                        { currency_code: "eur", amount: 38 },
-                        { currency_code: "gbp", amount: 32 },
-                        { currency_code: "dkk", amount: 283 },
-                    ],
+                    options: { "Pack Size": "Pack of 12" },
+                    prices: buildPrices(1099, 13, 12, 11),
                 },
             ],
-            variantImageMap: minimalTeeImages,
+            variantImageMap: lemonGingerImages,
         },
         {
-            title: "Lightweight Training Short",
-            handle: "lightweight-training-short",
-            subtitle: "Lightweight training short",
+            title: "Fruit Beer",
+            handle: "fruit-beer",
+            subtitle: "Probiotic Sparkling Drink",
             description:
-                "Breathable short with a clean waistband and built-in liner.",
+                "All the depth and fizz of a craft beer — without the alcohol. Fruit Beer by Embrace is a boldly sparkling, non-alcoholic prebiotic drink with a naturally complex flavor. Low sugar, gut-friendly, and perfect for any occasion.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("shorts") ? [getCategoryId("shorts")!] : [],
-            collection_id: getCollectionId("studio-training"),
-            thumbnail: getFirstImage(lightweightTrainingShortImages),
-            images: getAllImages(lightweightTrainingShortImages).map((url) => ({
-                url,
-            })),
-            options: [
-                { title: "Color", values: ["Black", "Grey"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-            ],
-            variants: [
-                {
-                    title: "S / Black",
-                    sku: "TRN-SHT-BLK-S",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "M / Black",
-                    sku: "TRN-SHT-BLK-M",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "L / Black",
-                    sku: "TRN-SHT-BLK-L",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "XL / Black",
-                    sku: "TRN-SHT-BLK-XL",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "S / Grey",
-                    sku: "TRN-SHT-CHAR-S",
-                    manage_inventory: false,
-                    options: { Color: "Grey", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "M / Grey",
-                    sku: "TRN-SHT-CHAR-M",
-                    manage_inventory: false,
-                    options: { Color: "Grey", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "L / Grey",
-                    sku: "TRN-SHT-CHAR-L",
-                    manage_inventory: false,
-                    options: { Color: "Grey", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-                {
-                    title: "XL / Grey",
-                    sku: "TRN-SHT-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Grey", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 52 },
-                        { currency_code: "eur", amount: 52 },
-                        { currency_code: "gbp", amount: 44 },
-                        { currency_code: "dkk", amount: 387 },
-                    ],
-                },
-            ],
-            variantImageMap: lightweightTrainingShortImages,
-        },
-        {
-            title: "Ribbed Sports Bra",
-            handle: "ribbed-sports-bra",
-            subtitle: "Ribbed sports bra",
-            description:
-                "Medium-support bra with minimalist seams and soft compression.",
-            status: "published" as const,
-            is_giftcard: false,
-            discountable: true,
-            category_ids: getCategoryId("bras") ? [getCategoryId("bras")!] : [],
-            collection_id: getCollectionId("studio-training"),
-            thumbnail: getFirstImage(ribbedSportsBraImages),
-            images: getAllImages(ribbedSportsBraImages).map((url) => ({ url })),
-            options: [
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-                { title: "Color", values: ["Sand", "Olive"] },
-            ],
-            variants: [
-                {
-                    title: "S / Sand",
-                    sku: "RIB-BRA-SAND-S",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "M / Sand",
-                    sku: "RIB-BRA-SAND-M",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "L / Sand",
-                    sku: "RIB-BRA-SAND-L",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "XL / Sand",
-                    sku: "RIB-BRA-SAND-XL",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "RIB-BRA-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "RIB-BRA-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "RIB-BRA-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "RIB-BRA-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 48 },
-                        { currency_code: "eur", amount: 48 },
-                        { currency_code: "gbp", amount: 41 },
-                        { currency_code: "dkk", amount: 357 },
-                    ],
-                },
-            ],
-            variantImageMap: ribbedSportsBraImages,
-        },
-        {
-            title: "Performance Legging",
-            handle: "performance-legging",
-            subtitle: "Performance legging",
-            description:
-                "Sculpting high-rise leggings built for studio training and daily movement.",
-            status: "published" as const,
-            is_giftcard: false,
-            discountable: true,
-            category_ids: getCategoryId("leggings")
-                ? [getCategoryId("leggings")!]
+            category_ids: getCategoryId("probiotic-drinks")
+                ? [getCategoryId("probiotic-drinks")!]
                 : [],
-            collection_id: getCollectionId("studio-training"),
-            thumbnail: getFirstImage(performanceLeggingImages),
-            images: getAllImages(performanceLeggingImages).map((url) => ({ url })),
+            collection_id: getCollectionId("signature-flavors"),
+            thumbnail: getFirstImage(fruitBeerImages),
+            images: getAllImages(fruitBeerImages).map((url) => ({ url })),
             options: [
-                { title: "Color", values: ["Charcoal", "Olive"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
+                { title: "Pack Size", values: ["Pack of 4", "Pack of 6", "Pack of 12"] },
             ],
             variants: [
                 {
-                    title: "S / Charcoal",
-                    sku: "PERF-LEG-CHAR-S",
+                    title: "Pack of 4",
+                    sku: "FB-4PACK",
                     manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
+                    options: { "Pack Size": "Pack of 4" },
+                    prices: buildPrices(389, 5, 5, 4),
                 },
                 {
-                    title: "M / Charcoal",
-                    sku: "PERF-LEG-CHAR-M",
+                    title: "Pack of 6",
+                    sku: "FB-6PACK",
                     manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
+                    options: { "Pack Size": "Pack of 6" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
                 {
-                    title: "L / Charcoal",
-                    sku: "PERF-LEG-CHAR-L",
+                    title: "Pack of 12",
+                    sku: "FB-12PACK",
                     manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "XL / Charcoal",
-                    sku: "PERF-LEG-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "PERF-LEG-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "PERF-LEG-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "PERF-LEG-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "PERF-LEG-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 88 },
-                        { currency_code: "eur", amount: 88 },
-                        { currency_code: "gbp", amount: 75 },
-                        { currency_code: "dkk", amount: 655 },
-                    ],
+                    options: { "Pack Size": "Pack of 12" },
+                    prices: buildPrices(1099, 13, 12, 11),
                 },
             ],
-            variantImageMap: performanceLeggingImages,
+            variantImageMap: fruitBeerImages,
         },
+        // ===========================================================
+        // VARIETY PACKS
+        // ===========================================================
         {
-            title: "Studio Zip Jacket",
-            handle: "studio-zip-jacket",
-            subtitle: "Studio zip jacket",
-            description: "Streamlined zip layer designed for warmups and cool-downs.",
-            status: "published" as const,
-            is_giftcard: false,
-            discountable: true,
-            category_ids: getCategoryId("jackets") ? [getCategoryId("jackets")!] : [],
-            collection_id: getCollectionId("studio-training"),
-            thumbnail: getFirstImage(studioZipJacketImages),
-            images: getAllImages(studioZipJacketImages).map((url) => ({ url })),
-            options: [
-                { title: "Color", values: ["Black", "Olive"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-            ],
-            variants: [
-                {
-                    title: "S / Black",
-                    sku: "STU-ZIP-BLK-S",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "M / Black",
-                    sku: "STU-ZIP-BLK-M",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "L / Black",
-                    sku: "STU-ZIP-BLK-L",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "XL / Black",
-                    sku: "STU-ZIP-BLK-XL",
-                    manage_inventory: false,
-                    options: { Color: "Black", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "STU-ZIP-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "STU-ZIP-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "STU-ZIP-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "STU-ZIP-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 128 },
-                        { currency_code: "eur", amount: 128 },
-                        { currency_code: "gbp", amount: 109 },
-                        { currency_code: "dkk", amount: 953 },
-                    ],
-                },
-            ],
-            variantImageMap: studioZipJacketImages,
-        },
-        {
-            title: "Movement Windbreaker",
-            handle: "movement-windbreaker",
-            subtitle: "Movement windbreaker",
+            title: "Triple Treat Pack",
+            handle: "triple-treat-pack",
+            subtitle: "Variety 6 Pack – 3 Flavors",
             description:
-                "Featherlight outer shell for transitional weather and urban movement.",
+                "Can't pick just one? The Triple Treat Pack gives you 6 cans across 3 of Embrace's signature flavors. A perfect introduction to the full Embrace range — gut-friendly, lightly sparkling, and full of vibrant flavors your body will love.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("jackets") ? [getCategoryId("jackets")!] : [],
-            collection_id: getCollectionId("outer-layers"),
-            thumbnail: getFirstImage(movementWindbreakerImages),
-            images: getAllImages(movementWindbreakerImages).map((url) => ({ url })),
+            category_ids: getCategoryId("variety-packs")
+                ? [getCategoryId("variety-packs")!]
+                : [],
+            collection_id: getCollectionId("mix-and-match"),
+            thumbnail: getFirstImage(tripleTreatPackImages),
+            images: getAllImages(tripleTreatPackImages).map((url) => ({ url })),
             options: [
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-                { title: "Color", values: ["Sand", "Olive"] },
+                { title: "Pack", values: ["6 Pack"] },
             ],
             variants: [
                 {
-                    title: "S / Sand",
-                    sku: "MOV-WIND-SAND-S",
+                    title: "6 Pack",
+                    sku: "TRIPLE-TREAT-6PACK",
                     manage_inventory: false,
-                    options: { Color: "Sand", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "M / Sand",
-                    sku: "MOV-WIND-SAND-M",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "L / Sand",
-                    sku: "MOV-WIND-SAND-L",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "XL / Sand",
-                    sku: "MOV-WIND-SAND-XL",
-                    manage_inventory: false,
-                    options: { Color: "Sand", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "S / Olive",
-                    sku: "MOV-WIND-OLIV-S",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "MOV-WIND-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "MOV-WIND-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "MOV-WIND-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 138 },
-                        { currency_code: "eur", amount: 138 },
-                        { currency_code: "gbp", amount: 117 },
-                        { currency_code: "dkk", amount: 1027 },
-                    ],
+                    options: { Pack: "6 Pack" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
             ],
-            variantImageMap: movementWindbreakerImages,
+            variantImageMap: tripleTreatPackImages,
         },
         {
-            title: "Travel Hoodie",
-            handle: "travel-hoodie",
-            subtitle: "Travel hoodie",
-            description: "Elevated hoodie with clean lines and premium weight.",
-            status: "published" as const,
-            is_giftcard: false,
-            discountable: true,
-            category_ids: getCategoryId("hoodies") ? [getCategoryId("hoodies")!] : [],
-            collection_id: getCollectionId("outer-layers"),
-            thumbnail: getFirstImage(travelHoodieImages),
-            images: getAllImages(travelHoodieImages).map((url) => ({ url })),
-            options: [
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-                { title: "Color", values: ["Off-White"] },
-            ],
-            variants: [
-                {
-                    title: "S / Off-White",
-                    sku: "TRV-HOOD-OWHT-S",
-                    manage_inventory: false,
-                    options: { Color: "Off-White", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 108 },
-                        { currency_code: "eur", amount: 108 },
-                        { currency_code: "gbp", amount: 92 },
-                        { currency_code: "dkk", amount: 804 },
-                    ],
-                },
-                {
-                    title: "M / Off-White",
-                    sku: "TRV-HOOD-OWHT-M",
-                    manage_inventory: false,
-                    options: { Color: "Off-White", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 108 },
-                        { currency_code: "eur", amount: 108 },
-                        { currency_code: "gbp", amount: 92 },
-                        { currency_code: "dkk", amount: 804 },
-                    ],
-                },
-                {
-                    title: "L / Off-White",
-                    sku: "TRV-HOOD-OWHT-L",
-                    manage_inventory: false,
-                    options: { Color: "Off-White", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 108 },
-                        { currency_code: "eur", amount: 108 },
-                        { currency_code: "gbp", amount: 92 },
-                        { currency_code: "dkk", amount: 804 },
-                    ],
-                },
-                {
-                    title: "XL / Off-White",
-                    sku: "TRV-HOOD-OWHT-XL",
-                    manage_inventory: false,
-                    options: { Color: "Off-White", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 108 },
-                        { currency_code: "eur", amount: 108 },
-                        { currency_code: "gbp", amount: 92 },
-                        { currency_code: "dkk", amount: 804 },
-                    ],
-                },
-            ],
-            variantImageMap: travelHoodieImages,
-        },
-        {
-            title: "Quilted Recovery Vest",
-            handle: "quilted-recovery-vest",
-            subtitle: "Quilted recovery vest",
+            title: "Embrace Mood Mix Pack",
+            handle: "embrace-mood-mix-pack",
+            subtitle: "Variety 8 Pack – All Flavors",
             description:
-                "Minimal insulated vest designed for layering post-training.",
+                "Eight cans, four flavors, endless moods. The Embrace Mood Mix Pack brings you the full flavor lineup — 2 cans of each signature flavor — so you can match your drink to your vibe, every day of the week.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("jackets") ? [getCategoryId("jackets")!] : [],
-            collection_id: getCollectionId("outer-layers"),
-            thumbnail: getFirstImage(quiltedRecoveryVestImages),
-            images: getAllImages(quiltedRecoveryVestImages).map((url) => ({ url })),
+            category_ids: getCategoryId("variety-packs")
+                ? [getCategoryId("variety-packs")!]
+                : [],
+            collection_id: getCollectionId("mix-and-match"),
+            thumbnail: getFirstImage(moodMixPackImages),
+            images: getAllImages(moodMixPackImages).map((url) => ({ url })),
             options: [
-                { title: "Color", values: ["Charcoal"] },
-                { title: "Size", values: ["S", "M", "L", "XL"] },
+                { title: "Pack", values: ["8 Pack"] },
             ],
             variants: [
                 {
-                    title: "S / Charcoal",
-                    sku: "QUILT-VST-CHAR-S",
+                    title: "8 Pack",
+                    sku: "MOOD-MIX-8PACK",
                     manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 118 },
-                        { currency_code: "eur", amount: 118 },
-                        { currency_code: "gbp", amount: 100 },
-                        { currency_code: "dkk", amount: 878 },
-                    ],
-                },
-                {
-                    title: "M / Charcoal",
-                    sku: "QUILT-VST-CHAR-M",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 118 },
-                        { currency_code: "eur", amount: 118 },
-                        { currency_code: "gbp", amount: 100 },
-                        { currency_code: "dkk", amount: 878 },
-                    ],
-                },
-                {
-                    title: "L / Charcoal",
-                    sku: "QUILT-VST-CHAR-L",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 118 },
-                        { currency_code: "eur", amount: 118 },
-                        { currency_code: "gbp", amount: 100 },
-                        { currency_code: "dkk", amount: 878 },
-                    ],
-                },
-                {
-                    title: "XL / Charcoal",
-                    sku: "QUILT-VST-CHAR-XL",
-                    manage_inventory: false,
-                    options: { Color: "Charcoal", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 118 },
-                        { currency_code: "eur", amount: 118 },
-                        { currency_code: "gbp", amount: 100 },
-                        { currency_code: "dkk", amount: 878 },
-                    ],
+                    options: { Pack: "8 Pack" },
+                    prices: buildPrices(749, 9, 9, 8),
                 },
             ],
-            variantImageMap: quiltedRecoveryVestImages,
+            variantImageMap: moodMixPackImages,
         },
         {
-            title: "Warm-Up Overshirt",
-            handle: "warm-up-overshirt",
-            subtitle: "Warm-up overshirt jacket",
+            title: "Lemon Ginger + Peach Lemon Pack",
+            handle: "lemon-ginger-peach-lemon-pack",
+            subtitle: "Variety 6 Pack – 2 Flavors",
             description:
-                "A structured overshirt jacket blending utility and comfort.",
+                "A zesty duo — 3 cans of Lemon Ginger and 3 cans of Peach Lemon. Bright, bold, and perfectly balanced. Share the love or keep them all to yourself — this pack is built for flavor adventurers.",
             status: "published" as const,
             is_giftcard: false,
             discountable: true,
-            category_ids: getCategoryId("jackets") ? [getCategoryId("jackets")!] : [],
-            collection_id: getCollectionId("outer-layers"),
-            thumbnail: getFirstImage(warmUpOvershirtImages),
-            images: getAllImages(warmUpOvershirtImages).map((url) => ({ url })),
+            category_ids: getCategoryId("variety-packs")
+                ? [getCategoryId("variety-packs")!]
+                : [],
+            collection_id: getCollectionId("mix-and-match"),
+            thumbnail: getFirstImage(lgPlPackImages),
+            images: getAllImages(lgPlPackImages).map((url) => ({ url })),
             options: [
-                { title: "Size", values: ["S", "M", "L", "XL"] },
-                { title: "Color", values: ["Olive"] },
+                { title: "Pack", values: ["6 Pack"] },
             ],
             variants: [
                 {
-                    title: "S / Olive",
-                    sku: "WARM-OVR-OLIV-S",
+                    title: "6 Pack",
+                    sku: "LG-PL-6PACK",
                     manage_inventory: false,
-                    options: { Color: "Olive", Size: "S" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "M / Olive",
-                    sku: "WARM-OVR-OLIV-M",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "M" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "L / Olive",
-                    sku: "WARM-OVR-OLIV-L",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "L" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
-                },
-                {
-                    title: "XL / Olive",
-                    sku: "WARM-OVR-OLIV-XL",
-                    manage_inventory: false,
-                    options: { Color: "Olive", Size: "XL" },
-                    prices: [
-                        { currency_code: "usd", amount: 98 },
-                        { currency_code: "eur", amount: 98 },
-                        { currency_code: "gbp", amount: 83 },
-                        { currency_code: "dkk", amount: 729 },
-                    ],
+                    options: { Pack: "6 Pack" },
+                    prices: buildPrices(579, 7, 7, 6),
                 },
             ],
-            variantImageMap: warmUpOvershirtImages,
+            variantImageMap: lgPlPackImages,
+        },
+        {
+            title: "Lemon Ginger + Watermelon Pack",
+            handle: "lemon-ginger-watermelon-pack",
+            subtitle: "Variety 6 Pack – 2 Flavors",
+            description:
+                "A refreshing contrast — bold Lemon Ginger meets juicy Watermelon Mint in one pack. 3 cans of each, crafted with prebiotics and 6.25g of fiber for a gut-nourishing, fizzy experience you'll want again and again.",
+            status: "published" as const,
+            is_giftcard: false,
+            discountable: true,
+            category_ids: getCategoryId("variety-packs")
+                ? [getCategoryId("variety-packs")!]
+                : [],
+            collection_id: getCollectionId("mix-and-match"),
+            thumbnail: getFirstImage(lgWmPackImages),
+            images: getAllImages(lgWmPackImages).map((url) => ({ url })),
+            options: [
+                { title: "Pack", values: ["6 Pack"] },
+            ],
+            variants: [
+                {
+                    title: "6 Pack",
+                    sku: "LG-WM-6PACK",
+                    manage_inventory: false,
+                    options: { Pack: "6 Pack" },
+                    prices: buildPrices(579, 7, 7, 6),
+                },
+            ],
+            variantImageMap: lgWmPackImages,
         },
     ];
 
@@ -2089,10 +969,11 @@ export default async function migration_25022026_initial_seed({
             // Assign images to each variant
             for (const variant of productWithImages.variants || []) {
                 const variantTitle = variant.title;
+                // Try to match "Color / Size" pattern first, fallback to full title as key
                 const colorMatch = variantTitle.match(/\/ ([A-Za-z-]+)$/);
-                const color = colorMatch ? colorMatch[1] : variantTitle;
+                const key = colorMatch ? colorMatch[1] : variantTitle;
 
-                const variantUrls = variantImageMap[color];
+                const variantUrls = variantImageMap[key];
 
                 if (variantUrls && variantUrls.length > 0) {
                     const imageIds = variantUrls

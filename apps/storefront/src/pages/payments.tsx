@@ -87,10 +87,10 @@ const Payments = () => {
                   All prices are displayed in your local currency based on your region. We currently support:
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
+                  <li>INR - Indian Rupee</li>
                   <li>USD - United States Dollar</li>
                   <li>EUR - Euro</li>
                   <li>GBP - British Pound</li>
-                  <li>DKK - Danish Krone</li>
                 </ul>
                 <p className="mt-4">
                   The final amount charged will be in the currency you selected at checkout. Currency conversion rates are updated daily and determined by your payment provider.

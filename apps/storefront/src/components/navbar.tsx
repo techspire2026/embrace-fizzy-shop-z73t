@@ -70,12 +70,13 @@ export const Navbar = () => {
               >
                 Shop All
               </Link>
-              <a
-                href={`${baseHref}/store`}
+              <Link
+                to="/$countryCode/categories/$handle"
+                params={{ countryCode, handle: "probiotic-drinks" }}
                 className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
               >
                 Flavors
-              </a>
+              </Link>
               <a
                 href={`${baseHref}/about`}
                 className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
@@ -115,12 +116,13 @@ export const Navbar = () => {
                       </Link>
                     </DrawerClose>
                     <DrawerClose asChild>
-                      <a
-                        href={`${baseHref}/store`}
+                      <Link
+                        to="/$countryCode/categories/$handle"
+                        params={{ countryCode, handle: "probiotic-drinks" }}
                         className="px-6 py-4 text-bark-800 text-base font-medium hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors"
                       >
                         Flavors
-                      </a>
+                      </Link>
                     </DrawerClose>
                     <DrawerClose asChild>
                       <a

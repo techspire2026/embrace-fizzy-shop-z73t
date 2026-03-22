@@ -186,6 +186,16 @@ export const getPriceFilterOptions = (currency_code: string) => {
     ]
   }
 
+  // INR - Indian Rupee has higher numerical values
+  if (currencyUpper === "INR") {
+    return [
+      { id: "0-500", label: `Under ${symbol}500`, min: 0, max: 500 },
+      { id: "500-800", label: `${symbol}500 - ${symbol}800`, min: 500, max: 800 },
+      { id: "800-1200", label: `${symbol}800 - ${symbol}1200`, min: 800, max: 1200 },
+      { id: "1200-plus", label: `${symbol}1200+`, min: 1200, max: Infinity },
+    ]
+  }
+
   // DKK - Danish Krone has higher numerical values
   if (currencyUpper === "DKK") {
     return [
