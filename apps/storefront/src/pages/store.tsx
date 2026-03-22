@@ -242,14 +242,26 @@ const Store = () => {
   }, [variantItems, selectedFilters, sortBy, priceOptions, bestSellingIds])
 
   return (
-    <div className="content-container pt-32 pb-12">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-display font-semibold text-neutral-900 tracking-tight">
-          All Products
-        </h1>
-      </div>
+    <div>
+      {/* Hero Banner */}
+      <section className="relative pt-[calc(64px+5rem)] pb-20 overflow-hidden bg-forest-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-forest-900 via-forest-800 to-forest-700 opacity-90" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-forest-500 via-green-400 to-forest-500 opacity-60" />
+        <div className="relative content-container text-center">
+          <span className="inline-block mb-4 px-4 py-1.5 bg-forest-700 text-forest-100 text-xs font-semibold tracking-widest uppercase rounded-full">
+            All Flavors
+          </span>
+          <h1 className="font-display text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
+            Find Your <span className="text-forest-300">Favorite</span>
+          </h1>
+          <p className="text-forest-200 text-lg max-w-xl mx-auto leading-relaxed">
+            Four bold, gut-friendly flavors — crafted with real fruit juice and 6.25g of prebiotic fiber per can.
+          </p>
+        </div>
+      </section>
 
+      {/* Products Section */}
+      <div className="content-container pt-10 pb-16">
       {/* Filter Bar */}
       <FilterBar
         filters={filterGroups}
@@ -292,6 +304,7 @@ const Store = () => {
           )}
         </>
       )}
+      </div>
     </div>
   )
 }

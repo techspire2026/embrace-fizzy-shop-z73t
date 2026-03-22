@@ -99,17 +99,17 @@ const FAQ_CATEGORIES = [
 
 const FAQ = () => {
   return (
-    <div className="min-h-screen bg-cream-50 pt-[100px]">
+    <div className="min-h-screen bg-white pt-[64px]">
       {/* Hero */}
-      <section className="py-16 bg-gradient-to-br from-terracotta-50 to-cream-100">
+      <section className="py-16 bg-forest-900">
         <div className="content-container text-center">
-          <span className="inline-block mb-4 px-4 py-1.5 bg-terracotta-100 text-terracotta-700 text-xs font-semibold tracking-widest uppercase rounded-full">
+          <span className="inline-block mb-4 px-4 py-1.5 bg-forest-700 text-forest-100 text-xs font-semibold tracking-widest uppercase rounded-full">
             Support
           </span>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-bark-900 mb-4">
+          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-4">
             Frequently Asked<br />Questions
           </h1>
-          <p className="text-bark-500 text-lg max-w-xl mx-auto">
+          <p className="text-forest-200 text-lg max-w-xl mx-auto">
             Everything you need to know about Embrace, our drinks, and how we work.
           </p>
         </div>
@@ -120,7 +120,7 @@ const FAQ = () => {
         <div className="max-w-3xl mx-auto space-y-12">
           {FAQ_CATEGORIES.map((cat) => (
             <div key={cat.category}>
-              <h2 className="font-display text-2xl font-bold text-bark-900 mb-6 pb-3 border-b border-terracotta-100">
+              <h2 className="font-display text-2xl font-bold text-forest-900 mb-6 pb-3 border-b border-forest-200">
                 {cat.category}
               </h2>
               <Accordion.Root type="single" collapsible className="space-y-3">
@@ -128,16 +128,16 @@ const FAQ = () => {
                   <Accordion.Item
                     key={index}
                     value={`${cat.category}-${index}`}
-                    className="bg-white border border-cream-200 rounded-2xl overflow-hidden"
+                    className="bg-white border border-forest-100 rounded-2xl overflow-hidden"
                   >
-                    <Accordion.Trigger className="flex items-center justify-between w-full px-6 py-5 text-left group hover:bg-cream-50 transition-colors">
-                      <span className="text-base font-semibold text-bark-900 pr-4">
+                    <Accordion.Trigger className="flex items-center justify-between w-full px-6 py-5 text-left group hover:bg-forest-50 transition-colors">
+                      <span className="text-base font-semibold text-forest-900 pr-4">
                         {faq.question}
                       </span>
-                      <ChevronDown className="w-5 h-5 text-terracotta-500 transition-transform duration-200 group-data-[state=open]:rotate-180 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-forest-500 transition-transform duration-200 group-data-[state=open]:rotate-180 flex-shrink-0" />
                     </Accordion.Trigger>
                     <Accordion.Content className="overflow-hidden data-[state=open]:animate-accordion-open data-[state=closed]:animate-accordion-close">
-                      <div className="px-6 pb-6 text-bark-600 leading-relaxed text-sm border-t border-cream-100 pt-4">
+                      <div className="px-6 pb-6 text-gray-600 leading-relaxed text-sm border-t border-forest-50 pt-4">
                         {faq.answer}
                       </div>
                     </Accordion.Content>
@@ -150,12 +150,12 @@ const FAQ = () => {
 
         {/* WhatsApp CTA */}
         <div className="max-w-3xl mx-auto mt-16">
-          <div className="bg-green-50 border border-green-200 rounded-3xl p-10 text-center">
+          <div className="bg-forest-50 border border-forest-200 rounded-3xl p-10 text-center">
             <div className="text-4xl mb-4">💬</div>
-            <h2 className="font-display text-2xl font-bold text-bark-900 mb-3">
+            <h2 className="font-display text-2xl font-bold text-forest-900 mb-3">
               Still have questions?
             </h2>
-            <p className="text-bark-600 mb-6">
+            <p className="text-forest-700 mb-6">
               Our team is available on WhatsApp — usually replies within minutes.
             </p>
             <a

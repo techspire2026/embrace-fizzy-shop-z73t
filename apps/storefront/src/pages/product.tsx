@@ -85,7 +85,7 @@ const ProductDetails = () => {
 
   return (
     <>
-      <div className="content-container pt-[100px] pb-12 bg-cream-50">
+      <div className="content-container pt-[80px] pb-12 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Left: Image Gallery */}
           <div>
@@ -96,27 +96,27 @@ const ProductDetails = () => {
           <div className="flex flex-col">
             <div className="sticky top-28 self-start w-full">
               {/* Brand pill */}
-              <span className="inline-block mb-3 px-3 py-1 bg-terracotta-100 text-terracotta-700 text-xs font-semibold tracking-widest uppercase rounded-full">
+              <span className="inline-block mb-3 px-3 py-1 bg-forest-100 text-forest-700 text-xs font-semibold tracking-widest uppercase rounded-full">
                 Prebiotic Fizzy Drink
               </span>
 
-              <h1 className="font-display text-4xl md:text-5xl font-bold text-bark-900 mb-2 tracking-tight">
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-forest-900 mb-2 tracking-tight">
                 {product.title}
               </h1>
 
               {/* Fiber highlight */}
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center gap-2 bg-sage-100 text-sage-700 px-4 py-2 rounded-full text-sm font-semibold">
+                <div className="flex items-center gap-2 bg-forest-100 text-forest-700 px-4 py-2 rounded-full text-sm font-semibold">
                   <span>6.25g Dietary Fiber</span>
                 </div>
-                <div className="flex items-center gap-2 bg-cream-200 text-bark-700 px-4 py-2 rounded-full text-sm font-semibold">
+                <div className="flex items-center gap-2 bg-forest-50 text-forest-800 px-4 py-2 rounded-full text-sm font-semibold">
                   <span>100% Natural</span>
                 </div>
               </div>
 
               {/* Product description */}
               {product.description && (
-                <p className="text-bark-600 leading-relaxed text-base mb-8">
+                <p className="text-gray-600 leading-relaxed text-base mb-8">
                   {product.description}
                 </p>
               )}
@@ -138,22 +138,22 @@ const ProductDetails = () => {
                   { icon: "🌿", text: "All natural ingredients" },
                   { icon: "↩️", text: "Easy 7-day returns" },
                 ].map((t) => (
-                  <div key={t.text} className="bg-cream-100 rounded-xl p-3 border border-cream-200">
+                  <div key={t.text} className="bg-forest-50 rounded-xl p-3 border border-forest-100">
                     <div className="text-lg mb-1">{t.icon}</div>
-                    <div className="text-xs text-bark-600 leading-tight">{t.text}</div>
+                    <div className="text-xs text-forest-700 leading-tight">{t.text}</div>
                   </div>
                 ))}
               </div>
 
               {/* Nutrition Facts Accordion */}
-              <div className="border border-cream-200 rounded-2xl overflow-hidden mb-4">
+              <div className="border border-forest-100 rounded-2xl overflow-hidden mb-4">
                 <button
                   onClick={() => setNutritionOpen(!nutritionOpen)}
-                  className="w-full flex items-center justify-between px-5 py-4 bg-cream-50 hover:bg-cream-100 transition-colors text-left"
+                  className="w-full flex items-center justify-between px-5 py-4 bg-forest-50 hover:bg-forest-100 transition-colors text-left"
                 >
-                  <span className="font-semibold text-bark-900 text-sm">Nutrition Facts</span>
+                  <span className="font-semibold text-forest-900 text-sm">Nutrition Facts</span>
                   <svg
-                    className={`w-4 h-4 text-bark-600 transition-transform duration-200 ${nutritionOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 text-forest-600 transition-transform duration-200 ${nutritionOpen ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -162,23 +162,23 @@ const ProductDetails = () => {
                   </svg>
                 </button>
                 {nutritionOpen && (
-                  <div className="px-5 py-4 bg-white border-t border-cream-200">
+                  <div className="px-5 py-4 bg-white border-t border-forest-100">
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       {NUTRITION.map((n) => (
                         <div
                           key={n.label}
-                          className={`rounded-xl p-3 text-center ${n.highlight ? "bg-terracotta-50 border border-terracotta-200" : "bg-cream-50"}`}
+                          className={`rounded-xl p-3 text-center ${n.highlight ? "bg-forest-800 border border-forest-700" : "bg-forest-50"}`}
                         >
-                          <div className={`font-display text-xl font-bold ${n.highlight ? "text-terracotta-600" : "text-bark-900"}`}>
+                          <div className={`font-display text-xl font-bold ${n.highlight ? "text-white" : "text-forest-900"}`}>
                             {n.value}
                           </div>
-                          <div className="text-xs text-bark-500 mt-0.5">{n.label}</div>
+                          <div className={`text-xs mt-0.5 ${n.highlight ? "text-forest-200" : "text-gray-500"}`}>{n.label}</div>
                         </div>
                       ))}
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-bark-700 uppercase tracking-wide mb-2">Ingredients</div>
-                      <p className="text-sm text-bark-500 leading-relaxed">
+                      <div className="text-xs font-semibold text-forest-700 uppercase tracking-wide mb-2">Ingredients</div>
+                      <p className="text-sm text-gray-500 leading-relaxed">
                         {INGREDIENTS_LIST.join(", ")}
                       </p>
                     </div>
@@ -205,7 +205,7 @@ const ProductDetails = () => {
               {/* Share */}
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 text-sm font-medium text-bark-600 hover:text-terracotta-600 transition-colors"
+                className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-forest-700 transition-colors"
               >
                 <Share className="w-4 h-4" />
                 {copied ? "Link copied!" : "Share this drink"}
@@ -215,26 +215,26 @@ const ProductDetails = () => {
         </div>
 
         {/* Brand promise */}
-        <div className="mt-20 bg-sage-50 rounded-3xl p-10 border border-sage-100">
+        <div className="mt-20 bg-forest-900 rounded-3xl p-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-3xl mb-3">🌱</div>
-              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Prebiotic Power</h3>
-              <p className="text-bark-500 text-sm leading-relaxed">
+              <h3 className="font-display text-lg font-bold text-white mb-2">Prebiotic Power</h3>
+              <p className="text-forest-200 text-sm leading-relaxed">
                 Chicory root inulin feeds the good bacteria in your gut, improving digestion and immunity over time.
               </p>
             </div>
             <div>
               <div className="text-3xl mb-3">🍹</div>
-              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Crafted for India</h3>
-              <p className="text-bark-500 text-sm leading-relaxed">
+              <h3 className="font-display text-lg font-bold text-white mb-2">Crafted for India</h3>
+              <p className="text-forest-200 text-sm leading-relaxed">
                 Flavors developed specifically for the Indian palate — bold, familiar, and refreshing all at once.
               </p>
             </div>
             <div>
               <div className="text-3xl mb-3">💚</div>
-              <h3 className="font-display text-lg font-bold text-bark-900 mb-2">Your Daily Ritual</h3>
-              <p className="text-bark-500 text-sm leading-relaxed">
+              <h3 className="font-display text-lg font-bold text-white mb-2">Your Daily Ritual</h3>
+              <p className="text-forest-200 text-sm leading-relaxed">
                 Replace your sugary fizzy drinks with Embrace — guilt-free, gut-friendly, and genuinely delicious.
               </p>
             </div>

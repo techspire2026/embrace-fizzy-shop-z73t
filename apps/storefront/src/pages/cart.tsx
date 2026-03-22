@@ -71,7 +71,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="content-container pt-32 pb-12">
+    <div className="content-container pt-[80px] pb-12">
       {cartLoading ? (
         <Loading />
       ) : cartItems.length === 0 ? (
@@ -82,13 +82,13 @@ const Cart = () => {
             {/* Left: Cart Items */}
             <div className="flex-1">
               <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-display font-semibold text-neutral-900 tracking-tight">
+                <h1 className="font-display text-3xl font-bold text-forest-900 tracking-tight">
                   Shopping Cart
                 </h1>
                 {cartItems.length > 0 && (
                   <a
                     href={`${baseHref}/store`}
-                    className="text-neutral-600 hover:text-neutral-900 text-sm underline"
+                    className="text-forest-600 hover:text-forest-900 text-sm font-medium"
                   >
                     Continue shopping
                   </a>
@@ -114,7 +114,7 @@ const Cart = () => {
               <div className="mb-8">
                 <label
                   htmlFor="cart-notes"
-                  className="block text-sm font-semibold text-neutral-900 mb-2 uppercase tracking-wide"
+                  className="block text-sm font-semibold text-forest-900 mb-2 uppercase tracking-wide"
                 >
                   Order Notes (Optional)
                 </label>
@@ -123,10 +123,10 @@ const Cart = () => {
                   value={cartNotes}
                   onChange={(e) => setCartNotes(e.target.value)}
                   placeholder="Special instructions for your order..."
-                  className="w-full px-4 py-3 border border-neutral-300 bg-white focus:outline-none focus:border-neutral-900 transition-colors resize-none"
+                  className="w-full px-4 py-3 border border-forest-200 rounded-lg bg-white focus:outline-none focus:border-forest-600 transition-colors resize-none"
                   rows={4}
                 />
-                <p className="text-xs text-neutral-500 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   Add any special requests or delivery instructions
                 </p>
               </div>
@@ -135,8 +135,8 @@ const Cart = () => {
             {/* Right: Order Summary */}
             {cart && (
               <div className="lg:w-96 flex-shrink-0">
-                <div className="bg-sand-50 p-8 sticky top-24">
-                  <h2 className="text-lg font-display font-semibold text-neutral-900 mb-6 uppercase tracking-wide">
+                <div className="bg-forest-50 p-8 sticky top-24 rounded-2xl border border-forest-100">
+                  <h2 className="font-display text-lg font-semibold text-forest-900 mb-6 tracking-wide">
                     Order Summary
                   </h2>
 
@@ -149,13 +149,13 @@ const Cart = () => {
                   </div>
 
                   <a href={`${baseHref}/checkout`}>
-                    <Button className="w-full bg-neutral-900 text-white py-4 hover:bg-neutral-800 transition-colors uppercase text-sm font-semibold tracking-wider">
+                    <Button className="w-full bg-forest-700 text-white py-4 rounded-full hover:bg-forest-800 transition-colors text-sm font-semibold tracking-wider">
                       Proceed to Checkout
                     </Button>
                   </a>
 
-                  <p className="text-xs text-neutral-600 mt-4 text-center">
-                    Free shipping on all orders
+                  <p className="text-xs text-gray-500 mt-4 text-center">
+                    Free shipping on orders above ₹499
                   </p>
                 </div>
               </div>
@@ -164,9 +164,9 @@ const Cart = () => {
 
           {/* Cross-Sell Products */}
           {crossSellProducts.length > 0 && (
-            <section className="mt-24 pt-24 border-t border-neutral-200">
-              <h2 className="text-2xl font-display font-semibold text-neutral-900 mb-8 tracking-tight">
-                Complete Your Look
+              <section className="mt-24 pt-24 border-t border-forest-100">
+              <h2 className="font-display text-2xl font-bold text-forest-900 mb-8 tracking-tight">
+                You Might Also Like
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {crossSellProducts.slice(0, 4).map((product) => (
@@ -175,7 +175,7 @@ const Cart = () => {
                     href={`${baseHref}/products/${product.handle}`}
                     className="group"
                   >
-                    <div className="aspect-[3/4] bg-sand-50 mb-4 overflow-hidden">
+                    <div className="aspect-[3/4] bg-forest-50 mb-4 overflow-hidden rounded-xl">
                       {product.thumbnail ? (
                         <img
                           src={product.thumbnail}
@@ -184,16 +184,16 @@ const Cart = () => {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-neutral-300 text-xs">No Image</span>
+                          <span className="text-forest-300 text-xs">No Image</span>
                         </div>
                       )}
                     </div>
                     <div className="text-center">
-                      <h3 className="text-sm font-medium text-neutral-900 mb-2 group-hover:text-neutral-600 transition-colors">
+                      <h3 className="text-sm font-medium text-forest-900 mb-2 group-hover:text-forest-600 transition-colors">
                         {product.title}
                       </h3>
                       {product.variants?.[0]?.calculated_price && (
-                        <p className="text-sm text-neutral-600">
+                        <p className="text-sm text-gray-500">
                           {formatPrice(
                             product.variants[0].calculated_price.calculated_amount,
                             product.variants[0].calculated_price.currency_code

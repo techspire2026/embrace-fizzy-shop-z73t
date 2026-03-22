@@ -15,9 +15,9 @@ const OrderConfirmation = () => {
   })
 
   return (
-    <div className="content-container py-6 pt-40">
-      <h1 className="text-xl mb-2">Thank you for your order</h1>
-      <p className="text-secondary-text mb-6">Order #{order.display_id}</p>
+    <div className="content-container py-6 pt-[80px]">
+      <h1 className="font-display text-2xl font-bold text-forest-900 mb-2">Thank you for your order</h1>
+      <p className="text-gray-500 mb-6">Order #{order.display_id}</p>
       <OrderDetails order={order} />
     </div>
   )

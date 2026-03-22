@@ -1,5 +1,4 @@
 import { CartDropdown } from "@/components/cart"
-import { PredictiveSearch } from "@/components/search/predictive-search"
 import {
   Drawer,
   DrawerClose,
@@ -10,153 +9,127 @@ import {
 } from "@/components/ui/drawer"
 import { getCountryCodeFromPath } from "@/lib/utils/region"
 import { Link, useLocation } from "@tanstack/react-router"
-import { EllipsisHorizontal } from "@medusajs/icons"
-import { useState, useEffect } from "react"
 
 export const Navbar = () => {
   const location = useLocation()
   const countryCode = getCountryCodeFromPath(location.pathname) || "in"
   const baseHref = `/${countryCode}`
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      setScrolled(currentScrollY > 40)
-
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        setIsVisible(false)
-      } else {
-        setIsVisible(true)
-      }
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY])
 
   return (
-    <>
-      {/* Announcement Bar */}
-      <div className="fixed top-0 inset-x-0 z-50 bg-terracotta-600 text-cream-50 py-2 text-center text-xs tracking-widest uppercase font-medium">
-        Free shipping on orders above ₹499 &nbsp;·&nbsp; 100% Natural Ingredients
-      </div>
+    <header className="fixed top-0 inset-x-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <nav className="content-container flex items-center justify-between h-16">
 
-      <div
-        className={`fixed top-[36px] inset-x-0 z-40 transition-all duration-300 ${
-          isVisible ? "translate-y-0" : "-translate-y-full"
-        } ${scrolled ? "bg-cream-50/95 backdrop-blur-md shadow-sm" : "bg-cream-50"}`}
-      >
-        <header className="h-16 border-b border-terracotta-100">
-          <nav className="content-container flex items-center justify-between w-full h-full">
-            {/* Logo */}
-            <Link
-              to="/$countryCode"
-              params={{ countryCode }}
-              className="text-2xl font-display font-bold text-bark-900 hover:text-terracotta-600 tracking-tight transition-colors"
+        {/* Logo */}
+        <Link
+          to="/$countryCode"
+          params={{ countryCode }}
+          className="flex items-center hover:opacity-90 transition-opacity"
+        >
+          <img
+            src="https://www.embracenutrition.in/assets/web/img/logo.png"
+            alt="Embrace Nutrition"
+            className="h-9 w-auto object-contain"
+          />
+        </Link>
+
+        {/* Desktop Nav Links */}
+        <div className="hidden md:flex items-center gap-x-8">
+          <Link
+            to="/$countryCode"
+            params={{ countryCode }}
+            className="text-sm text-gray-700 hover:text-forest-700 font-medium transition-colors tracking-wide"
+          >
+            Home
+          </Link>
+          <a
+            href={`${baseHref}/about`}
+            className="text-sm text-gray-700 hover:text-forest-700 font-medium transition-colors tracking-wide"
+          >
+            About
+          </a>
+          <Link
+            to="/$countryCode/store"
+            params={{ countryCode }}
+            className="text-sm text-gray-700 hover:text-forest-700 font-medium transition-colors tracking-wide"
+          >
+            Shop
+          </Link>
+        </div>
+
+        {/* Right: Cart + Sign In */}
+        <div className="flex items-center gap-x-4">
+          <CartDropdown />
+
+          <a
+            href={`${baseHref}/account`}
+            className="hidden md:inline-block text-sm text-gray-700 hover:text-forest-700 font-medium transition-colors tracking-wide"
+          >
+            Sign in
+          </a>
+
+          {/* Mobile Hamburger */}
+          <Drawer>
+            <DrawerTrigger
+              className="md:hidden text-gray-700 hover:text-forest-700 transition-colors p-1"
+              aria-label="Open menu"
             >
-              Embrace
-            </Link>
-
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-x-8">
-              <Link
-                to="/$countryCode/store"
-                params={{ countryCode }}
-                className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
-              >
-                Shop All
-              </Link>
-              <Link
-                to="/$countryCode/categories/$handle"
-                params={{ countryCode, handle: "probiotic-drinks" }}
-                className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
-              >
-                Flavors
-              </Link>
-              <a
-                href={`${baseHref}/about`}
-                className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
-              >
-                Our Story
-              </a>
-              <a
-                href={`${baseHref}/faq`}
-                className="text-sm text-bark-700 hover:text-terracotta-600 font-medium transition-colors tracking-wide"
-              >
-                FAQ
-              </a>
-            </div>
-
-            {/* Right Icons */}
-            <div className="flex items-center gap-x-4">
-              <PredictiveSearch />
-              <CartDropdown />
-
-              {/* Mobile Menu */}
-              <Drawer>
-                <DrawerTrigger className="lg:hidden text-bark-700 hover:text-terracotta-600 transition-colors">
-                  <EllipsisHorizontal className="w-6 h-6" />
-                </DrawerTrigger>
-                <DrawerContent side="left">
-                  <DrawerHeader className="border-b border-terracotta-100">
-                    <DrawerTitle className="font-display text-2xl font-bold text-bark-900">Embrace</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="flex flex-col py-6 gap-1">
-                    <DrawerClose asChild>
-                      <Link
-                        to="/$countryCode/store"
-                        params={{ countryCode }}
-                        className="px-6 py-4 text-bark-800 text-base font-medium hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors"
-                      >
-                        Shop All
-                      </Link>
-                    </DrawerClose>
-                    <DrawerClose asChild>
-                      <Link
-                        to="/$countryCode/categories/$handle"
-                        params={{ countryCode, handle: "probiotic-drinks" }}
-                        className="px-6 py-4 text-bark-800 text-base font-medium hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors"
-                      >
-                        Flavors
-                      </Link>
-                    </DrawerClose>
-                    <DrawerClose asChild>
-                      <a
-                        href={`${baseHref}/about`}
-                        className="px-6 py-4 text-bark-800 text-base font-medium hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors"
-                      >
-                        Our Story
-                      </a>
-                    </DrawerClose>
-                    <DrawerClose asChild>
-                      <a
-                        href={`${baseHref}/faq`}
-                        className="px-6 py-4 text-bark-800 text-base font-medium hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors"
-                      >
-                        FAQ
-                      </a>
-                    </DrawerClose>
-                    <div className="mx-6 mt-4 border-t border-terracotta-100 pt-4">
-                      <DrawerClose asChild>
-                        <a
-                          href={`${baseHref}/account`}
-                          className="block py-3 text-bark-600 text-sm hover:text-terracotta-600 transition-colors"
-                        >
-                          My Account
-                        </a>
-                      </DrawerClose>
-                    </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            </div>
-          </nav>
-        </header>
-      </div>
-    </>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </DrawerTrigger>
+            <DrawerContent side="left">
+              <DrawerHeader className="border-b border-forest-700 bg-forest-800">
+                <DrawerTitle className="flex items-center">
+                  <img
+                    src="https://www.embracenutrition.in/assets/web/img/logo.png"
+                    alt="Embrace Nutrition"
+                    className="h-8 w-auto object-contain"
+                  />
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="flex flex-col py-4 bg-white flex-1">
+                <DrawerClose asChild>
+                  <Link
+                    to="/$countryCode"
+                    params={{ countryCode }}
+                    className="px-6 py-4 text-forest-800 text-base font-medium hover:bg-forest-50 hover:text-forest-900 transition-colors"
+                  >
+                    Home
+                  </Link>
+                </DrawerClose>
+                <DrawerClose asChild>
+                  <a
+                    href={`${baseHref}/about`}
+                    className="px-6 py-4 text-forest-800 text-base font-medium hover:bg-forest-50 hover:text-forest-900 transition-colors"
+                  >
+                    About
+                  </a>
+                </DrawerClose>
+                <DrawerClose asChild>
+                  <Link
+                    to="/$countryCode/store"
+                    params={{ countryCode }}
+                    className="px-6 py-4 text-forest-800 text-base font-medium hover:bg-forest-50 hover:text-forest-900 transition-colors"
+                  >
+                    Shop
+                  </Link>
+                </DrawerClose>
+                <div className="mx-6 mt-4 border-t border-gray-100 pt-4">
+                  <DrawerClose asChild>
+                    <a
+                      href={`${baseHref}/account`}
+                      className="block py-3 text-forest-700 text-sm font-medium hover:text-forest-900 transition-colors"
+                    >
+                      Sign in
+                    </a>
+                  </DrawerClose>
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </div>
+      </nav>
+    </header>
   )
 }
+

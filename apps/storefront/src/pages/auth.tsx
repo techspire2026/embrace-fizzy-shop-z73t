@@ -38,26 +38,32 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center pt-32 pb-12 px-4">
+    <div className="min-h-screen bg-forest-50 flex items-center justify-center pt-[64px] pb-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-light mb-2">
-            {isLogin ? "Login to Your Account" : "Create Your Essentials Account"}
+          <img
+            src="https://www.embracenutrition.in/assets/web/img/logo.png"
+            alt="Embrace Nutrition"
+            className="h-10 w-auto object-contain mx-auto mb-6"
+          />
+          <h1 className="font-display text-3xl font-bold text-forest-900 mb-2">
+            {isLogin ? "Welcome Back" : "Create Your Account"}
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-gray-500">
             {isLogin
-              ? "Welcome back to Essentials"
-              : "Join Essentials for a personalized shopping experience"}
+              ? "Sign in to your Embrace account"
+              : "Join Embrace for a healthier you"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-2xl border border-forest-100 shadow-sm p-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-medium text-neutral-700 mb-2"
+                  className="block text-sm font-medium text-forest-800 mb-2"
                 >
                   First Name
                 </label>
@@ -66,14 +72,14 @@ export function Auth() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-300 focus:outline-none focus:border-neutral-900"
+                  className="w-full px-4 py-2 border border-forest-200 rounded-lg focus:outline-none focus:border-forest-600"
                   placeholder="John"
                 />
               </div>
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-medium text-neutral-700 mb-2"
+                  className="block text-sm font-medium text-forest-800 mb-2"
                 >
                   Last Name
                 </label>
@@ -82,7 +88,7 @@ export function Auth() {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-300 focus:outline-none focus:border-neutral-900"
+                  className="w-full px-4 py-2 border border-forest-200 rounded-lg focus:outline-none focus:border-forest-600"
                   placeholder="Doe"
                 />
               </div>
@@ -92,7 +98,7 @@ export function Auth() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-neutral-700 mb-2"
+              className="block text-sm font-medium text-forest-800 mb-2"
             >
               Email
             </label>
@@ -102,7 +108,7 @@ export function Auth() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 focus:outline-none focus:border-neutral-900"
+              className="w-full px-4 py-2 border border-forest-200 rounded-lg focus:outline-none focus:border-forest-600"
               placeholder="you@example.com"
             />
           </div>
@@ -110,7 +116,7 @@ export function Auth() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-neutral-700 mb-2"
+              className="block text-sm font-medium text-forest-800 mb-2"
             >
               Password
             </label>
@@ -120,14 +126,14 @@ export function Auth() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 focus:outline-none focus:border-neutral-900"
+              className="w-full px-4 py-2 border border-forest-200 rounded-lg focus:outline-none focus:border-forest-600"
               placeholder="Enter your password"
               minLength={8}
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm rounded-lg">
               {error}
             </div>
           )}
@@ -135,15 +141,16 @@ export function Auth() {
           <button
             type="submit"
             disabled={loginMutation.isPending || registerMutation.isPending}
-            className="w-full bg-neutral-900 text-white py-3 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-forest-700 text-white py-3 rounded-full hover:bg-forest-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
           >
             {loginMutation.isPending || registerMutation.isPending
               ? "Processing..."
               : isLogin
-                ? "Login"
+                ? "Sign In"
                 : "Create Account"}
           </button>
         </form>
+        </div>
 
         <div className="mt-6 text-center">
           <button
@@ -152,11 +159,11 @@ export function Auth() {
               setIsLogin(!isLogin)
               setError("")
             }}
-            className="text-neutral-600 hover:text-neutral-900 text-sm"
+            className="text-forest-600 hover:text-forest-900 text-sm font-medium"
           >
             {isLogin
               ? "Don't have an account? Register"
-              : "Already have an account? Login"}
+              : "Already have an account? Sign in"}
           </button>
         </div>
       </div>

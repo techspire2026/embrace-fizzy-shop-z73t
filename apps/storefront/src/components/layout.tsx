@@ -13,7 +13,7 @@ const Layout = () => {
         <div className="min-h-screen flex flex-col">
           <Navbar />
 
-          <main className="relative flex-1 z-0">
+          <main className="relative flex-1 z-0 pt-16">
             <ErrorBoundary>
               <Outlet />
             </ErrorBoundary>

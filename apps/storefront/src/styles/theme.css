@@ -54,6 +54,18 @@
   --color-bark-800: #523d2d;
   --color-bark-900: #433226;
 
+  /* Forest Green - primary brand green matching embracenutrition.in */
+  --color-forest-50: #f0f5f1;
+  --color-forest-100: #d9eadc;
+  --color-forest-200: #b3d4bb;
+  --color-forest-300: #7fb898;
+  --color-forest-400: #4d9970;
+  --color-forest-500: #2d7a52;
+  --color-forest-600: #1f613e;
+  --color-forest-700: #184d32;
+  --color-forest-800: #133d28;
+  --color-forest-900: #0e2e1e;
+
   /* Animation */
   --animation-ring: ring 2.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   --animation-fade-in-right: fade-in-right 0.3s cubic-bezier(0.5, 0, 0.5, 1)
