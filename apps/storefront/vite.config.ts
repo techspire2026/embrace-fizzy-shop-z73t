@@ -53,5 +53,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       dedupe: ["react", "react-dom", "@tanstack/react-router"],
     },
+
+    preview: {
+      allowedHosts: true,
+    },
   };
 });
