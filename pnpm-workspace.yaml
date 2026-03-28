@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "apps/whatomate/frontend"
 
 onlyBuiltDependencies:
   - "@medusajs/telemetry"

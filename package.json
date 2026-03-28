@@ -9,7 +9,8 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "backend:dev": "turbo dev --filter=backend",
-    "storefront:dev": "turbo dev --filter=storefront"
+    "storefront:dev": "turbo dev --filter=storefront",
+    "whatomate:dev": "cd apps/whatomate && make run"
   },
   "devDependencies": {
     "turbo": "^2.0.14",
