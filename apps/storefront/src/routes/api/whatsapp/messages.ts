@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 // GET /api/whatsapp/messages?contactId=<uuid>
-// Proxies to Whatomate and returns outbound messages (agent replies) for the contact.
 export const Route = createFileRoute("/api/whatsapp/messages")({
   server: {
     handlers: {
