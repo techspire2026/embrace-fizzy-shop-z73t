@@ -4,6 +4,7 @@ cmds = ["corepack enable"]
 
 [variables]
 COREPACK_INTEGRITY_KEYS = ""
+NODE_ENV = "development"
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile"]
@@ -12,4 +13,4 @@ cmds = ["pnpm install --frozen-lockfile"]
 cmds = ["pnpm --filter backend build"]
 
 [start]
-cmd = "pnpm --filter backend start"
+cmd = "NODE_ENV=production pnpm --filter backend start"
