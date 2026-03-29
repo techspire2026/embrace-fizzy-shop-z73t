@@ -2,6 +2,6 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "NODE_ENV=production pnpm --filter backend start"
+startCommand = "cd /app/apps/backend && NODE_ENV=production npx medusa start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

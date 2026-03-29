@@ -7,10 +7,10 @@ COREPACK_INTEGRITY_KEYS = ""
 NODE_ENV = "development"
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile"]
+cmds = ["pnpm install"]
 
 [phases.build]
-cmds = ["pnpm --filter backend build"]
+cmds = ["cd apps/backend && pnpm build && ls -la .medusa/server/public/admin/"]
 
 [start]
-cmd = "NODE_ENV=production pnpm --filter backend start"
+cmd = "cd /app/apps/backend && NODE_ENV=production npx medusa start"
